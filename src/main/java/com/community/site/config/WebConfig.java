@@ -1,0 +1,42 @@
+package com.community.site.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
+import org.springframework.format.datetime.DateFormatter;
+import org.springframework.format.datetime.DateFormatterRegistrar;
+import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
+import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.TimeZone;
+
+@Configuration
+public class WebConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        // Java 8 날짜/시간 포맷터 등록
+        DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
+        registrar.setDateFormatter(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        registrar.setDateTimeFormatter(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        registrar.registerFormatters(registry);
+        
+        // Java 7 이하 날짜/시간 포맷터 등록
+        DateFormatterRegistrar oldRegistrar = new DateFormatterRegistrar();
+        oldRegistrar.setFormatter(new DateFormatter("yyyy-MM-dd"));
+        oldRegistrar.registerFormatters(registry);
+    }
+    
+    @Bean
+    public LocaleResolver localeResolver() {
+        SessionLocaleResolver localeResolver = new SessionLocaleResolver();
+        localeResolver.setDefaultLocale(Locale.KOREA); // 한국어로 기본 로케일 설정
+        localeResolver.setDefaultTimeZone(TimeZone.getTimeZone(ZoneId.of("Asia/Seoul"))); // 한국 시간대 설정
+        return localeResolver;
+    }
+} 
