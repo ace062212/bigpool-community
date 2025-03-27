@@ -155,11 +155,13 @@
             opacity: 0;
             transition: opacity 0.3s ease;
             display: none;
+            pointer-events: none;
         }
         
         .modal-backdrop.show {
             opacity: 1;
             display: block;
+            pointer-events: auto;
         }
         
         .login-modal {
@@ -364,12 +366,29 @@
             const registerBtns = document.querySelectorAll('.btn-register:not(#logoutBtn)'); // 로그아웃 버튼 제외
             const closeBtns = document.querySelectorAll('.modal-close');
             
+            // 모달과 배경 완전히 닫기 함수
+            function closeAllModals() {
+                // 모달 닫기
+                modalBackdrop.classList.remove('show');
+                loginModal.classList.remove('show');
+                registerModal.classList.remove('show');
+                
+                // 기존에 생성된 다른 오버레이 요소들도 정리
+                const existingOverlays = document.querySelectorAll('.login-transition-overlay:not(.active)');
+                existingOverlays.forEach(overlay => {
+                    if (overlay && overlay.parentNode) {
+                        overlay.parentNode.removeChild(overlay);
+                    }
+                });
+            }
+            
             // 로그인 모달 열기
             if (loginBtns) {
                 loginBtns.forEach(btn => {
                     if (!btn.classList.contains('profile-link')) { // 프로필 링크 제외
                         btn.addEventListener('click', function(e) {
                             e.preventDefault();
+                            closeAllModals(); // 먼저 모든 모달 닫기
                             modalBackdrop.classList.add('show');
                             loginModal.classList.add('show');
                         });
@@ -382,6 +401,7 @@
                 registerBtns.forEach(btn => {
                     btn.addEventListener('click', function(e) {
                         e.preventDefault();
+                        closeAllModals(); // 먼저 모든 모달 닫기
                         modalBackdrop.classList.add('show');
                         registerModal.classList.add('show');
                     });
@@ -392,9 +412,7 @@
             if (closeBtns) {
                 closeBtns.forEach(btn => {
                     btn.addEventListener('click', function() {
-                        modalBackdrop.classList.remove('show');
-                        loginModal.classList.remove('show');
-                        registerModal.classList.remove('show');
+                        closeAllModals();
                     });
                 });
             }
@@ -402,9 +420,7 @@
             // 배경 클릭 시 모달 닫기
             if (modalBackdrop) {
                 modalBackdrop.addEventListener('click', function() {
-                    modalBackdrop.classList.remove('show');
-                    loginModal.classList.remove('show');
-                    registerModal.classList.remove('show');
+                    closeAllModals();
                 });
             }
             
@@ -428,15 +444,32 @@
                 });
             }
             
+            // 페이지 로드 시 모든 모달 닫기
+            closeAllModals();
+            
+            // ESC 키 누를 때 모달 닫기
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeAllModals();
+                }
+            });
+            
             // 로그인 폼 제출 시 애니메이션 효과
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
                 loginForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    modalBackdrop.classList.remove('show');
-                    loginModal.classList.remove('show');
+                    closeAllModals();
                     
-                    // 파도 애니메이션 시작 - 파란색 배경으로 화면 가득 채움
+                    // 기존 오버레이 제거
+                    const existingOverlays = document.querySelectorAll('.login-transition-overlay');
+                    existingOverlays.forEach(overlay => {
+                        if (overlay && overlay.parentNode) {
+                            overlay.parentNode.removeChild(overlay);
+                        }
+                    });
+                    
+                    // 새 오버레이 생성
                     const overlay = document.createElement('div');
                     overlay.className = 'login-transition-overlay';
                     document.body.appendChild(overlay);
@@ -468,10 +501,17 @@
             if (registerForm) {
                 registerForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    modalBackdrop.classList.remove('show');
-                    registerModal.classList.remove('show');
+                    closeAllModals();
                     
-                    // 파도 애니메이션 시작 - 파란색 배경으로 화면 가득 채움
+                    // 기존 오버레이 제거
+                    const existingOverlays = document.querySelectorAll('.login-transition-overlay');
+                    existingOverlays.forEach(overlay => {
+                        if (overlay && overlay.parentNode) {
+                            overlay.parentNode.removeChild(overlay);
+                        }
+                    });
+                    
+                    // 새 오버레이 생성
                     const overlay = document.createElement('div');
                     overlay.className = 'login-transition-overlay';
                     document.body.appendChild(overlay);
@@ -504,8 +544,17 @@
             if (logoutBtn && logoutForm) {
                 logoutBtn.addEventListener('click', function(e) {
                     e.preventDefault();
+                    closeAllModals();
                     
-                    // 파도 애니메이션 시작
+                    // 기존 오버레이 제거
+                    const existingOverlays = document.querySelectorAll('.login-transition-overlay');
+                    existingOverlays.forEach(overlay => {
+                        if (overlay && overlay.parentNode) {
+                            overlay.parentNode.removeChild(overlay);
+                        }
+                    });
+                    
+                    // 새 오버레이 생성
                     const overlay = document.createElement('div');
                     overlay.className = 'login-transition-overlay';
                     document.body.appendChild(overlay);

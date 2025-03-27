@@ -8,10 +8,12 @@
     background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
     z-index: 9999;
     transition: height 0.8s ease-in-out;
+    pointer-events: none; /* 기본적으로 클릭 이벤트를 통과시킴 */
 }
 
 .login-transition-overlay.active {
     height: 100%;
+    pointer-events: auto; /* 활성화 시 클릭 이벤트 가능 */
 }
 
 /* 로그인 성공 시 환영 메시지 스타일 */
@@ -27,6 +29,7 @@
     z-index: 10000;
     opacity: 0;
     transition: opacity 0.3s ease;
+    pointer-events: none; /* 클릭 이벤트 통과 */
 }
 
 .welcome-message.show {
@@ -46,6 +49,7 @@
     z-index: 10000;
     opacity: 0;
     transition: opacity 0.3s ease;
+    pointer-events: none; /* 클릭 이벤트 통과 */
 }
 
 .logout-message.show {
