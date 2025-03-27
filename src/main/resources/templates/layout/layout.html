@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- 사용자 정의 CSS -->
     <link th:href="@{/css/style.css}" rel="stylesheet">
+    <link th:href="@{/css/custom.css}" rel="stylesheet">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -127,10 +128,128 @@
             margin-right: 0.5rem;
             font-weight: 600;
         }
+        
+        /* 로그인/회원가입 모달 스타일 */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1050;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: none;
+        }
+        
+        .modal-backdrop.show {
+            opacity: 1;
+            display: block;
+        }
+        
+        .login-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            z-index: 1060;
+            width: 90%;
+            max-width: 450px;
+            padding: 2rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            display: none;
+        }
+        
+        .login-modal.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            display: block;
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .modal-title {
+            font-weight: 700;
+            color: #0061f2;
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6c757d;
+        }
+        
+        .modal-close:hover {
+            color: #0061f2;
+        }
     </style>
     <th:block layout:fragment="css"></th:block>
 </head>
 <body>
+    <!-- 로그인 전환 효과를 위한 오버레이 -->
+    <div class="login-transition-overlay"></div>
+    
+    <!-- 로그인 성공 환영 메시지 -->
+    <div class="welcome-message">환영합니다</div>
+    
+    <!-- 로그아웃 메시지 -->
+    <div class="logout-message">다음에 또 봐요!</div>
+    
+    <!-- 로그인 모달 -->
+    <div class="modal-backdrop"></div>
+    <div class="login-modal" id="loginModal">
+        <div class="modal-header">
+            <h4 class="modal-title">로그인</h4>
+            <button type="button" class="modal-close">&times;</button>
+        </div>
+        <form th:action="@{/login}" method="post" id="loginForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">아이디</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">비밀번호</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="rememberMe" name="remember-me">
+                <label class="form-check-label" for="rememberMe">자동 로그인</label>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mb-3" style="background: linear-gradient(90deg, #0061f2 0%, #00c6f9 100%); border: none;">로그인</button>
+            <div class="text-center">
+                <a th:href="@{/register}" class="btn btn-link">회원가입</a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- 회원가입 모달 -->
+    <div class="login-modal" id="registerModal">
+        <div class="modal-header">
+            <h4 class="modal-title">회원가입</h4>
+            <button type="button" class="modal-close">&times;</button>
+        </div>
+        <p class="text-center mb-4">BIGPOOL에 오신 것을 환영합니다!</p>
+        <div class="text-center">
+            <a th:href="@{/register}" class="btn btn-primary w-100" style="background: linear-gradient(90deg, #0061f2 0%, #00c6f9 100%); border: none;">회원가입 페이지로 이동</a>
+        </div>
+    </div>
+    
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container">
@@ -144,11 +263,8 @@
                         <li class="nav-item">
                             <a class="nav-link" th:href="@{/}">홈</a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" sec:authorize="isAuthenticated()">
                             <a class="nav-link" th:href="@{/posts}">게시판</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" th:href="@{/about}">소개</a>
                         </li>
                     </ul>
                     <div class="d-flex align-items-center">
@@ -160,9 +276,9 @@
                             <div class="user-avatar">
                                 <span sec:authentication="name" class="user-initial"></span>
                             </div>
-                            <a class="btn btn-auth btn-login me-2" th:href="@{/profile}">프로필</a>
-                            <form th:action="@{/logout}" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-auth btn-register">로그아웃</button>
+                            <a class="btn btn-auth btn-login me-2 profile-link" th:href="@{/profile}">프로필</a>
+                            <a id="logoutBtn" class="btn btn-auth btn-register">로그아웃</a>
+                            <form id="logoutForm" th:action="@{/logout}" method="post" style="display:none;">
                             </form>
                         </div>
                     </div>
@@ -188,7 +304,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-logo">BIGPOOL</div>
-                <p class="footer-text">&copy; 2023 BIGPOOL - 지식과 아이디어의 큰 바다. All rights reserved.</p>
+                <p class="footer-text">&copy; 2025 BIGPOOL - 지식과 아이디어의 큰 바다. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -204,6 +320,127 @@
                     element.textContent = element.textContent.charAt(0).toUpperCase();
                 }
             });
+            
+            // 로그인/회원가입 모달 제어
+            const modalBackdrop = document.querySelector('.modal-backdrop');
+            const loginModal = document.getElementById('loginModal');
+            const registerModal = document.getElementById('registerModal');
+            const loginBtns = document.querySelectorAll('.btn-login');
+            const registerBtns = document.querySelectorAll('.btn-register:not(#logoutBtn)'); // 로그아웃 버튼 제외
+            const closeBtns = document.querySelectorAll('.modal-close');
+            
+            // 로그인 모달 열기
+            if (loginBtns) {
+                loginBtns.forEach(btn => {
+                    if (!btn.classList.contains('profile-link')) { // 프로필 링크 제외
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            modalBackdrop.classList.add('show');
+                            loginModal.classList.add('show');
+                        });
+                    }
+                });
+            }
+            
+            // 회원가입 모달 열기
+            if (registerBtns) {
+                registerBtns.forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        modalBackdrop.classList.add('show');
+                        registerModal.classList.add('show');
+                    });
+                });
+            }
+            
+            // 모달 닫기
+            if (closeBtns) {
+                closeBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        modalBackdrop.classList.remove('show');
+                        loginModal.classList.remove('show');
+                        registerModal.classList.remove('show');
+                    });
+                });
+            }
+            
+            // 배경 클릭 시 모달 닫기
+            if (modalBackdrop) {
+                modalBackdrop.addEventListener('click', function() {
+                    modalBackdrop.classList.remove('show');
+                    loginModal.classList.remove('show');
+                    registerModal.classList.remove('show');
+                });
+            }
+            
+            // 로그인 폼 제출 시 애니메이션 효과
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    modalBackdrop.classList.remove('show');
+                    loginModal.classList.remove('show');
+                    
+                    // 파도 애니메이션 시작 - 파란색 배경으로 화면 가득 채움
+                    const overlay = document.createElement('div');
+                    overlay.className = 'login-transition-overlay';
+                    document.body.appendChild(overlay);
+                    
+                    // 환영 메시지 생성
+                    const welcomeMsg = document.createElement('div');
+                    welcomeMsg.className = 'welcome-message';
+                    welcomeMsg.textContent = '환영합니다!';
+                    document.body.appendChild(welcomeMsg);
+                    
+                    setTimeout(() => {
+                        overlay.classList.add('active');
+                        
+                        // 파도 애니메이션이 어느 정도 진행된 후 환영 메시지 표시
+                        setTimeout(() => {
+                            welcomeMsg.classList.add('show');
+                            
+                            // 환영 메시지가 표시된 후, 일정 시간 뒤에 폼 제출
+                            setTimeout(() => {
+                                this.submit();
+                            }, 1500);
+                        }, 500);
+                    }, 10);
+                });
+            }
+            
+            // 로그아웃 버튼 클릭 이벤트
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutForm = document.getElementById('logoutForm');
+            if (logoutBtn && logoutForm) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 파도 애니메이션 시작
+                    const overlay = document.createElement('div');
+                    overlay.className = 'login-transition-overlay';
+                    document.body.appendChild(overlay);
+                    
+                    // 로그아웃 메시지 생성
+                    const logoutMsg = document.createElement('div');
+                    logoutMsg.className = 'logout-message';
+                    logoutMsg.textContent = '다음에 또 봐요!';
+                    document.body.appendChild(logoutMsg);
+                    
+                    setTimeout(() => {
+                        overlay.classList.add('active');
+                        
+                        // 파도 애니메이션이 어느 정도 진행된 후 로그아웃 메시지 표시
+                        setTimeout(() => {
+                            logoutMsg.classList.add('show');
+                            
+                            // 일정 시간 후 로그아웃 폼 제출
+                            setTimeout(() => {
+                                logoutForm.submit();
+                            }, 1500);
+                        }, 500);
+                    }, 10);
+                });
+            }
             
             // 현재 활성 페이지 메뉴 강조
             const currentLocation = window.location.pathname;

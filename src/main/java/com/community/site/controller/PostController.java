@@ -36,6 +36,7 @@ public class PostController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public String listPosts(Model model, 
                            @RequestParam(defaultValue = "0") int page,
                            @RequestParam(defaultValue = "10") int size,
@@ -66,6 +67,7 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public String viewPost(@PathVariable Long id, Model model, Principal principal) {
         try {
             Post post = postService.findById(id)

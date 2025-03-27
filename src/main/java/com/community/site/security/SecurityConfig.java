@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .frameOptions(frameOptions -> frameOptions.disable()))
             .authorizeHttpRequests(auth -> {
                 auth.requestMatchers("/h2-console/**").permitAll();
-                auth.requestMatchers("/posts/new/**", "/posts/*/edit/**", "/posts/*/delete/**", "/profile/**").authenticated();
+                auth.requestMatchers("/posts/**", "/profile/**").authenticated();
                 auth.anyRequest().permitAll();
             })
             .formLogin(form -> {
@@ -39,6 +39,9 @@ public class SecurityConfig {
             .logout(logout -> {
                 logout.logoutUrl("/logout")
                       .logoutSuccessUrl("/")
+                      .invalidateHttpSession(true)
+                      .clearAuthentication(true)
+                      .deleteCookies("JSESSIONID", "remember-me")
                       .permitAll();
             });
 
