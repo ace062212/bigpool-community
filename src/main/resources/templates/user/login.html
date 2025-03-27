@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>로그인 - BIGPOOL</title>
+    <style>
+        .login-card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .login-card .card-header {
+            background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 1.25rem;
+            padding: 1.25rem;
+            border-bottom: none;
+        }
+        
+        .login-card .card-body {
+            padding: 2rem;
+        }
+        
+        .login-btn {
+            background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,97,242,0.2);
+        }
+        
+        .form-control {
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .form-control:focus {
+            border-color: #0061f2;
+            box-shadow: 0 0 0 0.25rem rgba(0,97,242,0.25);
+        }
+        
+        .register-link {
+            color: #0061f2;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        
+        .register-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card login-card">
+                        <div class="card-header">로그인</div>
+                        <div class="card-body">
+                            <div th:if="${param.error}" class="alert alert-danger">
+                                로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.
+                            </div>
+                            <div th:if="${param.logout}" class="alert alert-success">
+                                로그아웃 되었습니다.
+                            </div>
+                            <form th:action="@{/login}" method="post">
+                                <div class="mb-4">
+                                    <label for="username" class="form-label">아이디</label>
+                                    <input type="text" class="form-control" id="username" name="username" required autofocus>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="password" class="form-label">비밀번호</label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary login-btn">로그인</button>
+                            </form>
+                            <div class="mt-4 text-center">
+                                <p>계정이 없으신가요? <a th:href="@{/register}" class="register-link">회원가입</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

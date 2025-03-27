@@ -1,0 +1,69 @@
+/* 글로벌 스타일 */
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    color: #333;
+    background-color: #f8f9fa;
+}
+
+/* 헤더 */
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* 푸터 */
+footer {
+    margin-top: 3rem;
+}
+
+/* 카드 */
+.card {
+    transition: transform 0.3s ease;
+    border-radius: 0.5rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* 버튼 */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+/* 페이지네이션 */
+.pagination .page-link {
+    color: #007bff;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* 댓글 영역 */
+.comment-list {
+    margin-top: 2rem;
+}
+
+.comment {
+    border-left: 4px solid #e9ecef;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.comment-header {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.comment-content {
+    font-size: 1rem;
+} 

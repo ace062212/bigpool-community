@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - $LAYOUT_TITLE">BIGPOOL</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 아이콘 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 사용자 정의 CSS -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .navbar {
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: linear-gradient(90deg, #0061f2 0%, #00c6f9 100%);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.25rem;
+            position: relative;
+        }
+        
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: white;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .nav-link:hover:after {
+            width: 80%;
+        }
+        
+        .btn-auth {
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login {
+            background-color: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+        
+        .btn-login:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .btn-register {
+            background-color: white;
+            color: #0061f2;
+            border: 2px solid white;
+        }
+        
+        .btn-register:hover {
+            background-color: #f8f9fa;
+            color: #0056b3;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .footer {
+            background: linear-gradient(90deg, #0061f2 0%, #00c6f9 100%);
+            color: white;
+            padding: 2rem 0;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .footer-logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-text {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        .main-content {
+            min-height: calc(100vh - 200px);
+            padding: 2rem 0;
+        }
+        
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: white;
+            color: #0061f2;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            font-weight: 600;
+        }
+    </style>
+    <th:block layout:fragment="css"></th:block>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" th:href="@{/}">BIGPOOL</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/}">홈</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/posts}">게시판</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/about}">소개</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex align-items-center">
+                        <div sec:authorize="isAnonymous()">
+                            <a class="btn btn-auth btn-login me-2" th:href="@{/login}">로그인</a>
+                            <a class="btn btn-auth btn-register" th:href="@{/register}">회원가입</a>
+                        </div>
+                        <div sec:authorize="isAuthenticated()" class="d-flex align-items-center">
+                            <div class="user-avatar">
+                                <span sec:authentication="name" class="user-initial"></span>
+                            </div>
+                            <a class="btn btn-auth btn-login me-2" th:href="@{/profile}">프로필</a>
+                            <form th:action="@{/logout}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-auth btn-register">로그아웃</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${message}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            
+            <div layout:fragment="content">
+                <!-- 컨텐츠가 여기에 삽입됩니다 -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">BIGPOOL</div>
+                <p class="footer-text">&copy; 2023 BIGPOOL - 지식과 아이디어의 큰 바다. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 사용자 아바타의 이니셜 설정
+            const userInitials = document.querySelectorAll('.user-initial');
+            userInitials.forEach(element => {
+                if(element.textContent) {
+                    element.textContent = element.textContent.charAt(0).toUpperCase();
+                }
+            });
+            
+            // 현재 활성 페이지 메뉴 강조
+            const currentLocation = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href').replace('@{', '').replace('}', '');
+                if ((href === '/' && currentLocation === '/') || 
+                    (href !== '/' && currentLocation.includes(href))) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+    <th:block layout:fragment="script"></th:block>
+</body>
+</html> 

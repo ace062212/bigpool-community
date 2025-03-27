@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>회원가입 - BIGPOOL</title>
+    <style>
+        .register-card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .register-card .card-header {
+            background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 1.25rem;
+            padding: 1.25rem;
+            border-bottom: none;
+        }
+        
+        .register-card .card-body {
+            padding: 2rem;
+        }
+        
+        .register-btn {
+            background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .register-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,97,242,0.2);
+        }
+        
+        .form-control {
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .form-control:focus {
+            border-color: #0061f2;
+            box-shadow: 0 0 0 0.25rem rgba(0,97,242,0.25);
+        }
+        
+        .login-link {
+            color: #0061f2;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        
+        .login-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card register-card">
+                        <div class="card-header">회원가입</div>
+                        <div class="card-body">
+                            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                            <form th:action="@{/register}" method="post">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">아이디</label>
+                                    <input type="text" class="form-control" id="username" name="username" required autofocus>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">이름</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">이메일</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">비밀번호</label>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="passwordConfirm" class="form-label">비밀번호 확인</label>
+                                    <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary register-btn">회원가입</button>
+                            </form>
+                            <div class="mt-4 text-center">
+                                <p>이미 계정이 있으신가요? <a th:href="@{/login}" class="login-link">로그인</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

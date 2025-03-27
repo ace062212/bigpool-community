@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title th:text="${post.id != null} ? '게시글 수정' : '새 게시글 작성'">게시글 작성</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container mt-4">
+            <h2 th:text="${post.id != null} ? '게시글 수정' : '새 게시글 작성'">게시글 작성</h2>
+            
+            <form th:action="${post.id != null} ? @{'/posts/' + ${post.id} + '/edit'} : @{/posts/new}" 
+                  method="post" th:object="${post}">
+                <div class="mb-3">
+                    <label for="title" class="form-label">제목</label>
+                    <input type="text" class="form-control" id="title" th:field="*{title}" required>
+                    <div class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="content" class="form-label">내용</label>
+                    <textarea class="form-control" id="content" th:field="*{content}" rows="10" required></textarea>
+                    <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <a th:href="${post.id != null} ? @{'/posts/' + ${post.id}} : @{/posts}" class="btn btn-secondary">취소</a>
+                    <button type="submit" class="btn btn-primary">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html> 
