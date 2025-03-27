@@ -31,6 +31,12 @@ public class User {
     @NotBlank
     @Size(max = 50)
     private String name;
+    
+    @Size(max = 50)
+    private String nickname;
+    
+    @Size(max = 255)
+    private String profileImage;
 
     @Email
     @Size(max = 100)
@@ -45,6 +51,14 @@ public class User {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        // 닉네임이 비어있으면 이름으로 설정
+        if (nickname == null || nickname.isEmpty()) {
+            nickname = name;
+        }
+        // 프로필 이미지가 비어있으면 기본 이미지 설정
+        if (profileImage == null || profileImage.isEmpty()) {
+            profileImage = "/images/default-profile.png";
+        }
     }
     
     @PreUpdate
@@ -67,6 +81,14 @@ public class User {
 
     public String getName() {
         return name;
+    }
+    
+    public String getNickname() {
+        return nickname;
+    }
+    
+    public String getProfileImage() {
+        return profileImage;
     }
 
     public String getEmail() {
@@ -96,6 +118,14 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+    
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
     }
 
     public void setEmail(String email) {

@@ -17,6 +17,16 @@
             box-shadow: 0 3px 10px rgba(0,0,0,0.03);
         }
         
+        .search-form input,
+        .search-form .btn-outline-primary,
+        .search-form .btn-outline-primary:hover,
+        .post-list-header h1,
+        .pagination .page-link,
+        .pagination .page-item.active .page-link,
+        .pagination .page-item.disabled .page-link {
+            display: none;
+        }
+        
         .post-card {
             border: none;
             border-radius: 0.75rem;
@@ -132,7 +142,7 @@
                                 <a th:href="@{'/posts/' + ${post.id}}" th:text="${post.title}" class="post-title">제목</a>
                             </h3>
                             <div class="post-meta">
-                                <span th:if="${post.author != null}" th:text="${post.author.name}">작성자</span>
+                                <span th:if="${post.author != null}" th:text="${post.author.nickname}">닉네임</span>
                                 <span th:if="${post.author == null}">익명</span> • 
                                 <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span>
                             </div>

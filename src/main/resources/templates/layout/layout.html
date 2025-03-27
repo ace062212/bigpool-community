@@ -33,6 +33,7 @@
             font-weight: 700;
             font-size: 1.5rem;
             letter-spacing: 1px;
+            color: white;
         }
         
         .nav-link {
@@ -40,6 +41,7 @@
             padding: 0.5rem 1rem !important;
             margin: 0 0.25rem;
             position: relative;
+            color: white;
         }
         
         .nav-link:after {
@@ -55,6 +57,15 @@
         }
         
         .nav-link:hover:after {
+            width: 80%;
+        }
+        
+        .nav-link.active {
+            font-weight: 600;
+            color: white;
+        }
+        
+        .nav-link.active:after {
             width: 80%;
         }
         
@@ -104,11 +115,13 @@
             font-weight: 700;
             font-size: 1.5rem;
             margin-bottom: 1rem;
+            color: white;
         }
         
         .footer-text {
             opacity: 0.8;
             font-size: 0.9rem;
+            color: white;
         }
         
         .main-content {
@@ -233,7 +246,7 @@
             </div>
             <button type="submit" class="btn btn-primary w-100 mb-3" style="background: linear-gradient(90deg, #0061f2 0%, #00c6f9 100%); border: none;">로그인</button>
             <div class="text-center">
-                <a th:href="@{/register}" class="btn btn-link">회원가입</a>
+                <a href="#" class="btn-show-register btn btn-link">계정이 없으신가요? 회원가입</a>
             </div>
         </form>
     </div>
@@ -244,10 +257,32 @@
             <h4 class="modal-title">회원가입</h4>
             <button type="button" class="modal-close">&times;</button>
         </div>
-        <p class="text-center mb-4">BIGPOOL에 오신 것을 환영합니다!</p>
-        <div class="text-center">
-            <a th:href="@{/register}" class="btn btn-primary w-100" style="background: linear-gradient(90deg, #0061f2 0%, #00c6f9 100%); border: none;">회원가입 페이지로 이동</a>
-        </div>
+        <form th:action="@{/register}" method="post" id="registerForm">
+            <div class="mb-3">
+                <label for="username" class="form-label">아이디</label>
+                <input type="text" class="form-control" id="username" name="username" required autofocus>
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">이름</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">이메일</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">비밀번호</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <div class="mb-3">
+                <label for="passwordConfirm" class="form-label">비밀번호 확인</label>
+                <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mb-3" style="background: linear-gradient(90deg, #0061f2 0%, #00c6f9 100%); border: none;">회원가입</button>
+            <div class="text-center">
+                <a href="#" class="btn-show-login btn btn-link">이미 계정이 있으신가요? 로그인</a>
+            </div>
+        </form>
     </div>
     
     <header>
@@ -373,6 +408,26 @@
                 });
             }
             
+            // 회원가입 모달에서 로그인 모달로 전환
+            const showLoginBtn = document.querySelector('.btn-show-login');
+            if (showLoginBtn) {
+                showLoginBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    registerModal.classList.remove('show');
+                    loginModal.classList.add('show');
+                });
+            }
+            
+            // 로그인 모달에서 회원가입 모달로 전환
+            const showRegisterBtn = document.querySelector('.btn-show-register');
+            if (showRegisterBtn) {
+                showRegisterBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    loginModal.classList.remove('show');
+                    registerModal.classList.add('show');
+                });
+            }
+            
             // 로그인 폼 제출 시 애니메이션 효과
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
@@ -390,6 +445,41 @@
                     const welcomeMsg = document.createElement('div');
                     welcomeMsg.className = 'welcome-message';
                     welcomeMsg.textContent = '환영합니다!';
+                    document.body.appendChild(welcomeMsg);
+                    
+                    setTimeout(() => {
+                        overlay.classList.add('active');
+                        
+                        // 파도 애니메이션이 어느 정도 진행된 후 환영 메시지 표시
+                        setTimeout(() => {
+                            welcomeMsg.classList.add('show');
+                            
+                            // 환영 메시지가 표시된 후, 일정 시간 뒤에 폼 제출
+                            setTimeout(() => {
+                                this.submit();
+                            }, 1500);
+                        }, 500);
+                    }, 10);
+                });
+            }
+            
+            // 회원가입 폼 제출 시 애니메이션 효과
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    modalBackdrop.classList.remove('show');
+                    registerModal.classList.remove('show');
+                    
+                    // 파도 애니메이션 시작 - 파란색 배경으로 화면 가득 채움
+                    const overlay = document.createElement('div');
+                    overlay.className = 'login-transition-overlay';
+                    document.body.appendChild(overlay);
+                    
+                    // 환영 메시지 생성
+                    const welcomeMsg = document.createElement('div');
+                    welcomeMsg.className = 'welcome-message';
+                    welcomeMsg.textContent = 'BIGPOOL에 오신 것을 환영합니다!';
                     document.body.appendChild(welcomeMsg);
                     
                     setTimeout(() => {

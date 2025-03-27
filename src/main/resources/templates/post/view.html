@@ -182,6 +182,10 @@
         .login-link:hover {
             text-decoration: underline;
         }
+        
+        .back-to-list {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -193,7 +197,7 @@
                 <div class="post-meta">
                     <span class="author">
                         <i class="fas fa-user me-1"></i>
-                        <span th:if="${post != null && post.author != null}" th:text="${post.author.username}">작성자</span>
+                        <span th:if="${post != null && post.author != null}" th:text="${post.author.nickname}">작성자</span>
                         <span th:if="${post == null || post.author == null}">익명</span>
                     </span>
                     <span class="date">
@@ -240,7 +244,7 @@
                 <div th:if="${comments != null && !comments.empty}" class="comments-list">
                     <div th:each="comment : ${comments}" class="comment-item">
                         <div class="comment-header">
-                            <span class="comment-author" th:text="${comment.author != null ? comment.author.username : '익명'}">댓글 작성자</span>
+                            <span class="comment-author" th:text="${comment.author != null ? comment.author.nickname : '익명'}">댓글 작성자</span>
                             <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">댓글 날짜</span>
                         </div>
                         <div class="comment-content" th:text="${comment.content}">댓글 내용</div>

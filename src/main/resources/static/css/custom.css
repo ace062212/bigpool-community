@@ -14,23 +14,6 @@
     height: 100%;
 }
 
-/* 백그라운드 화이트 오버레이 */
-.background-white-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: white;
-    z-index: 9990;
-    opacity: 0;
-    transition: opacity 1.5s ease;
-}
-
-.background-white-overlay.fade-in {
-    opacity: 1;
-}
-
 /* 로그인 성공 시 환영 메시지 스타일 */
 .welcome-message {
     position: fixed;
@@ -48,10 +31,6 @@
 
 .welcome-message.show {
     opacity: 1;
-}
-
-.welcome-message.color-change {
-    color: #0061f2;
 }
 
 /* 로그아웃 메시지 스타일 */

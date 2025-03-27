@@ -103,4 +103,44 @@ public class UserController {
             return "error/error";
         }
     }
+    
+    @GetMapping("/profile/edit")
+    public String editProfileForm(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+        
+        String username = principal.getName();
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        
+        model.addAttribute("user", user);
+        return "user/edit-profile";
+    }
+    
+    @PostMapping("/profile/edit")
+    public String editProfile(@RequestParam("nickname") String nickname,
+                             Principal principal,
+                             RedirectAttributes attributes) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+        
+        try {
+            String username = principal.getName();
+            User user = userService.findByUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+            
+            // 닉네임 업데이트
+            user.setNickname(nickname);
+            userService.updateUser(user);
+            
+            attributes.addFlashAttribute("message", "프로필이 성공적으로 업데이트되었습니다.");
+            return "redirect:/profile";
+        } catch (Exception e) {
+            e.printStackTrace();
+            attributes.addFlashAttribute("error", "프로필 업데이트 중 오류가 발생했습니다: " + e.getMessage());
+            return "redirect:/profile/edit";
+        }
+    }
 } 
