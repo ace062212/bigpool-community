@@ -9,24 +9,6 @@
             margin-bottom: 2rem;
         }
         
-        .search-form {
-            background-color: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.03);
-        }
-        
-        .search-form input,
-        .search-form .btn-outline-primary,
-        .search-form .btn-outline-primary:hover,
-        .post-list-header h1,
-        .pagination .page-link,
-        .pagination .page-item.active .page-link,
-        .pagination .page-item.disabled .page-link {
-            display: none;
-        }
-        
         .post-card {
             border: none;
             border-radius: 0.75rem;
@@ -115,15 +97,6 @@
                 <a th:href="@{/posts/new}" class="btn btn-primary create-btn">새 글 작성</a>
             </div>
 
-            <!-- 검색 폼 -->
-            <div class="search-form">
-                <form th:action="@{/posts}" method="get" class="d-flex">
-                    <input type="text" name="search" class="form-control me-2" placeholder="검색어 입력..."
-                           th:value="${search != null ? search : ''}" />
-                    <button type="submit" class="btn btn-outline-primary">검색</button>
-                </form>
-            </div>
-
             <!-- 게시글 목록 -->
             <div th:if="${posts == null || posts.empty}" class="empty-state">
                 <div class="empty-icon">
@@ -157,28 +130,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- 페이지네이션 -->
-            <div th:if="${posts != null && totalPages > 1}" class="mt-4">
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                            <a class="page-link" th:href="@{/posts(page=${currentPage - 1}, search=${search})}" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
-                            th:classappend="${i == currentPage} ? 'active'">
-                            <a class="page-link" th:href="@{/posts(page=${i}, search=${search})}" th:text="${i + 1}">1</a>
-                        </li>
-                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                            <a class="page-link" th:href="@{/posts(page=${currentPage + 1}, search=${search})}" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
             </div>
         </div>
     </div>
