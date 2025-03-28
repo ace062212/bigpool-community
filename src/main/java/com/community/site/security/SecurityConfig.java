@@ -2,6 +2,7 @@ package com.community.site.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -11,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -26,6 +28,7 @@ public class SecurityConfig {
                 .frameOptions(frameOptions -> frameOptions.disable()))
             .authorizeHttpRequests(auth -> {
                 auth.requestMatchers("/h2-console/**").permitAll();
+                auth.requestMatchers("/admin/**").hasRole("ADMIN");
                 auth.requestMatchers("/posts/**", "/profile/**").authenticated();
                 auth.anyRequest().permitAll();
             })

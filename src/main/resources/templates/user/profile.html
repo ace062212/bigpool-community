@@ -57,7 +57,13 @@
                             <img th:src="${user.profileImage}" alt="프로필 이미지" class="profile-img">
                             <h4 class="mb-0" th:text="${user.nickname}"></h4>
                             <p class="text-white-50" th:text="${user.username}"></p>
-                            <a th:href="@{/profile/edit}" class="btn btn-light edit-btn">프로필 편집</a>
+                            <div class="d-flex gap-2 justify-content-center">
+                                <a th:href="@{/profile/edit}" class="btn btn-light edit-btn">프로필 편집</a>
+                                <a th:href="@{/profile/change-password}" class="btn btn-light edit-btn">비밀번호 변경</a>
+                            </div>
+                            <div th:if="${user.role == 'ROLE_ADMIN'}" class="mt-2">
+                                <a th:href="@{/admin/reset-password}" class="btn btn-danger btn-sm">관리자 비밀번호 관리</a>
+                            </div>
                         </div>
                         <div class="profile-body">
                             <p><strong>아이디:</strong> <span th:text="${user.username}"></span></p>

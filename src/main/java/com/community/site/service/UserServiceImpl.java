@@ -55,4 +55,19 @@ public class UserServiceImpl implements UserService {
     public User updateUser(User user) {
         return userRepository.save(user);
     }
+    
+    @Override
+    @Transactional
+    public boolean changePassword(User user, String currentPassword, String newPassword) {
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            return false;
+        }
+        
+        // 새 비밀번호 설정
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        
+        return true;
+    }
 } 

@@ -16,4 +16,13 @@ public interface UserService {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
     User updateUser(User user);
+    
+    /**
+     * 사용자의 비밀번호를 변경합니다.
+     * @param user 사용자 객체
+     * @param currentPassword 현재 비밀번호
+     * @param newPassword 새 비밀번호
+     * @return 성공 여부
+     */
+    boolean changePassword(User user, String currentPassword, String newPassword);
 } 

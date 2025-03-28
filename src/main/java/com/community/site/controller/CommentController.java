@@ -73,8 +73,9 @@ public class CommentController {
             User user = userService.findByUsername(principal.getName())
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-            // 작성자만 수정할 수 있음
-            if (!comment.getAuthor().getId().equals(user.getId())) {
+            // 작성자 또는 관리자만 수정할 수 있음
+            boolean isAdmin = "ROLE_ADMIN".equals(user.getRole());
+            if (!isAdmin && !comment.getAuthor().getId().equals(user.getId())) {
                 throw new IllegalArgumentException("댓글을 수정할 권한이 없습니다.");
             }
 
@@ -110,8 +111,9 @@ public class CommentController {
             User user = userService.findByUsername(principal.getName())
                     .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-            // 작성자만 삭제할 수 있음
-            if (!comment.getAuthor().getId().equals(user.getId())) {
+            // 작성자 또는 관리자만 삭제할 수 있음
+            boolean isAdmin = "ROLE_ADMIN".equals(user.getRole());
+            if (!isAdmin && !comment.getAuthor().getId().equals(user.getId())) {
                 throw new IllegalArgumentException("댓글을 삭제할 권한이 없습니다.");
             }
 

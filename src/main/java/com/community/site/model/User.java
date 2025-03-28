@@ -42,6 +42,10 @@ public class User {
     @Size(max = 100)
     @Column(unique = true)
     private String email;
+    
+    @NotBlank
+    @Size(max = 20)
+    private String role = "ROLE_USER"; // 기본값으로 일반 사용자 권한 설정
 
     private LocalDateTime createdAt;
     
@@ -58,6 +62,10 @@ public class User {
         // 프로필 이미지가 비어있으면 기본 이미지 설정
         if (profileImage == null || profileImage.isEmpty()) {
             profileImage = "/images/default-profile.png";
+        }
+        // 역할이 비어있으면 기본값 설정
+        if (role == null || role.isEmpty()) {
+            role = "ROLE_USER";
         }
     }
     
@@ -93,6 +101,10 @@ public class User {
 
     public String getEmail() {
         return email;
+    }
+    
+    public String getRole() {
+        return role;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -131,6 +143,10 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
+    
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
@@ -138,5 +154,10 @@ public class User {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    // Admin 권한 체크 유틸리티 메서드
+    public boolean isAdmin() {
+        return "ROLE_ADMIN".equals(this.role);
     }
 } 

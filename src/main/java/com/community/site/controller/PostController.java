@@ -87,14 +87,24 @@ public class PostController {
             
             // 현재 사용자가 게시글 작성자인지 확인
             boolean isAuthor = false;
-            if (principal != null && post.getAuthor() != null) {
+            boolean isAdmin = false;
+            
+            if (principal != null) {
                 User user = userService.findByUsername(principal.getName())
                         .orElse(null);
-                if (user != null && post.getAuthor().getId() != null) {
-                    isAuthor = user.getId().equals(post.getAuthor().getId());
+                if (user != null) {
+                    // 관리자 권한 확인
+                    isAdmin = "ROLE_ADMIN".equals(user.getRole());
+                    
+                    // 작성자 확인
+                    if (post.getAuthor() != null && post.getAuthor().getId() != null) {
+                        isAuthor = user.getId().equals(post.getAuthor().getId());
+                    }
                 }
             }
+            
             model.addAttribute("isAuthor", isAuthor);
+            model.addAttribute("isAdmin", isAdmin);
             
             return "post/view";
         } catch (IllegalArgumentException e) {
@@ -143,8 +153,9 @@ public class PostController {
         User user = userService.findByUsername(principal.getName())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         
-        // 작성자만 수정할 수 있음
-        if (!post.getAuthor().getId().equals(user.getId())) {
+        // 작성자 또는 관리자만 수정할 수 있음
+        boolean isAdmin = "ROLE_ADMIN".equals(user.getRole());
+        if (!isAdmin && !post.getAuthor().getId().equals(user.getId())) {
             throw new IllegalArgumentException("게시글을 수정할 권한이 없습니다.");
         }
         
@@ -168,8 +179,9 @@ public class PostController {
         User user = userService.findByUsername(principal.getName())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         
-        // 작성자만 수정할 수 있음
-        if (!existingPost.getAuthor().getId().equals(user.getId())) {
+        // 작성자 또는 관리자만 수정할 수 있음
+        boolean isAdmin = "ROLE_ADMIN".equals(user.getRole());
+        if (!isAdmin && !existingPost.getAuthor().getId().equals(user.getId())) {
             throw new IllegalArgumentException("게시글을 수정할 권한이 없습니다.");
         }
         
@@ -190,8 +202,9 @@ public class PostController {
         User user = userService.findByUsername(principal.getName())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         
-        // 작성자만 삭제할 수 있음
-        if (!post.getAuthor().getId().equals(user.getId())) {
+        // 작성자 또는 관리자만 삭제할 수 있음
+        boolean isAdmin = "ROLE_ADMIN".equals(user.getRole());
+        if (!isAdmin && !post.getAuthor().getId().equals(user.getId())) {
             throw new IllegalArgumentException("게시글을 삭제할 권한이 없습니다.");
         }
         
