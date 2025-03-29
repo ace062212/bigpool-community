@@ -45,7 +45,10 @@
                 
                 <div class="d-flex justify-content-between">
                     <a th:href="${post.id != null} ? @{'/posts/' + ${post.id}} : @{/posts}" class="btn btn-secondary">취소</a>
-                    <button type="submit" class="btn btn-primary">저장</button>
+                    <button type="submit" id="submitButton" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" id="submitSpinner" role="status" aria-hidden="true"></span>
+                        <span id="submitText">저장</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -63,6 +66,27 @@
                     return;
                 }
             }
+        });
+        
+        document.querySelector('form').addEventListener('submit', function(event) {
+            const submitButton = document.getElementById('submitButton');
+            const submitSpinner = document.getElementById('submitSpinner');
+            const submitText = document.getElementById('submitText');
+            
+            if (submitButton.disabled) {
+                event.preventDefault();
+                return;
+            }
+            
+            submitButton.disabled = true;
+            submitSpinner.classList.remove('d-none');
+            submitText.textContent = '저장 중...';
+            
+            setTimeout(function() {
+                submitButton.disabled = false;
+                submitSpinner.classList.add('d-none');
+                submitText.textContent = '저장';
+            }, 5000);
         });
     </script>
 </body>
