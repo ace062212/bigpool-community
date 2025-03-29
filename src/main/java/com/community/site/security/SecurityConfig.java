@@ -28,6 +28,8 @@ public class SecurityConfig {
                 .frameOptions(frameOptions -> frameOptions.disable()))
             .authorizeHttpRequests(auth -> {
                 auth.requestMatchers("/h2-console/**").permitAll();
+                auth.requestMatchers("/uploads/**").permitAll();
+                auth.requestMatchers("/static/uploads/**").permitAll();
                 auth.requestMatchers("/admin/**").hasRole("ADMIN");
                 auth.requestMatchers("/posts/**", "/profile/**").authenticated();
                 auth.anyRequest().permitAll();

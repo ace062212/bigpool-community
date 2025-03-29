@@ -41,6 +41,10 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
     
+    // 이미지 파일 경로 (여러 이미지는 쉼표로 구분)
+    @Column(columnDefinition = "TEXT")
+    private String imageFiles;
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -85,6 +89,46 @@ public class Post {
         return comments;
     }
     
+    public String getImageFiles() {
+        return imageFiles;
+    }
+    
+    // 이미지 파일 경로 목록으로 변환
+    public List<String> getImageFilesList() {
+        if (imageFiles == null || imageFiles.isEmpty()) {
+            System.out.println("getImageFilesList: 이미지 파일 없음");
+            return new ArrayList<>();
+        }
+        
+        try {
+            System.out.println("getImageFilesList: 원본 이미지 경로 = " + imageFiles);
+            
+            List<String> paths = new ArrayList<>();
+            String[] imagePathsArray = imageFiles.split(",");
+            
+            System.out.println("getImageFilesList: 분리된 이미지 경로 개수 = " + imagePathsArray.length);
+            
+            for (String path : imagePathsArray) {
+                if (path != null && !path.trim().isEmpty()) {
+                    // 경로에서 파일명만 추출 (만약 전체 경로가 저장되어 있다면)
+                    String fileName = path.trim();
+                    if (fileName.contains("/")) {
+                        fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+                    }
+                    paths.add(fileName);
+                    System.out.println("getImageFilesList: 추가된 이미지 파일명 = " + fileName);
+                }
+            }
+            
+            System.out.println("getImageFilesList: 총 " + paths.size() + "개의 이미지 경로 반환");
+            return paths;
+        } catch (Exception e) {
+            System.err.println("이미지 파일 경로 변환 오류: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+    
     // Setters
     public void setId(Long id) {
         this.id = id;
@@ -116,5 +160,9 @@ public class Post {
     
     public void setComments(List<Comment> comments) {
         this.comments = comments;
+    }
+    
+    public void setImageFiles(String imageFiles) {
+        this.imageFiles = imageFiles;
     }
 } 

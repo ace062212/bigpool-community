@@ -193,20 +193,18 @@
         }
         
         .gallery-item {
-            margin-bottom: 1rem;
-            border-radius: 0.5rem;
+            margin-bottom: 2rem;
             overflow: hidden;
+            max-width: 100%;
         }
         
         .gallery-item img {
             width: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
+            object-fit: contain;
             cursor: pointer;
-        }
-        
-        .gallery-item img:hover {
-            transform: scale(1.02);
+            max-height: 800px;
+            display: block;
+            margin: 0 auto;
         }
         
         /* 유튜브 비디오 컨테이너 스타일 */
@@ -240,6 +238,35 @@
             
             <!-- 게시글 내용 -->
             <div class="post-content" th:if="${post != null}" th:utext="${post.content}">게시글 내용</div>
+            
+            <!-- 새로운 방식 - 매우 간단하게 구현 -->
+            <div class="image-gallery" th:if="${post != null && post.imageFiles != null && !post.imageFiles.isEmpty()}">
+                <div class="row">
+                    <div class="col-md-12 mb-3" th:each="imagePath : ${post.getImageFilesList()}" th:if="${imagePath != null && !imagePath.isEmpty()}">
+                        <div class="gallery-item">
+                            <img th:src="@{'/uploads/' + ${imagePath}}" 
+                                 class="img-fluid" 
+                                 alt="첨부 이미지"
+                                 onclick="openImageViewer(this.src)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 이미지 모달 -->
+            <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageModalLabel">이미지 확대보기</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img id="modalImage" src="" class="img-fluid" alt="확대된 이미지">
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <!-- 수정/삭제 버튼 (작성자 또는 관리자에게만 표시) -->
             <div th:if="${post != null && (isAuthor || isAdmin)}" class="post-actions">
@@ -305,5 +332,39 @@
             </div>
         </div>
     </div>
+
+    <script th:inline="javascript">
+        function openImageModal(imageSrc) {
+            console.log('이미지 모달 열기:', imageSrc);
+            document.getElementById('modalImage').src = imageSrc;
+            var myModal = new bootstrap.Modal(document.getElementById('imageModal'));
+            myModal.show();
+        }
+        
+        function openImageViewer(src) {
+            window.open(src, '_blank', 'width=800,height=600');
+        }
+        
+        // 이미지 로딩 오류 처리
+        document.addEventListener('DOMContentLoaded', function() {
+            // 모든 이미지 요소에 오류 처리 추가
+            var images = document.querySelectorAll('.gallery-item img');
+            
+            images.forEach(function(img) {
+                img.onerror = function() {
+                    console.error('이미지 로딩 실패:', this.src);
+                    // 오류 시 대체 이미지 표시
+                    this.src = '/images/error-image.png';
+                    this.alt = '이미지 로딩 실패';
+                    
+                    // 부모 요소 표시 조정
+                    var galleryItem = this.closest('.gallery-item');
+                    if (galleryItem) {
+                        galleryItem.innerHTML += '<div class="text-danger mt-2">이미지를 불러올 수 없습니다.</div>';
+                    }
+                };
+            });
+        });
+    </script>
 </body>
 </html> 

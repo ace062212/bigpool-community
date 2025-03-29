@@ -1,5 +1,6 @@
 package com.community.site.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
@@ -10,6 +11,8 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -17,9 +20,12 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.io.File;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    private static final Logger log = LoggerFactory.getLogger(WebConfig.class);
 
     @Override
     public void addFormatters(FormatterRegistry registry) {
@@ -45,16 +51,53 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 파일 업로드 디렉토리를 외부에서 접근 가능하게 설정
-        Path uploadDir = Paths.get("uploads");
-        String uploadPath = uploadDir.toFile().getAbsolutePath();
+        log.info("정적 리소스 핸들러 설정 시작");
         
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadPath + "/")
-                .setCachePeriod(3600);
-                
-        // 기존 리소스 핸들러는 그대로 유지
+        // 기본 정적 리소스
         registry.addResourceHandler("/**")
-                .addResourceLocations("classpath:/static/");
+                .addResourceLocations("classpath:/static/")
+                .setCachePeriod(0);
+        
+        // 업로드 디렉토리 설정
+        String uploadDir = "src/main/resources/static/uploads";
+        File uploadDirectory = new File(uploadDir);
+        
+        if (!uploadDirectory.exists()) {
+            uploadDirectory.mkdirs();
+            log.info("업로드 디렉토리 생성: {}", uploadDirectory.getAbsolutePath());
+        }
+        
+        log.info("업로드 디렉토리 경로: {}", uploadDirectory.getAbsolutePath());
+        
+        // 업로드 디렉토리 내 파일 목록 확인
+        if (uploadDirectory.exists() && uploadDirectory.isDirectory()) {
+            File[] files = uploadDirectory.listFiles();
+            if (files != null) {
+                log.info("현재 업로드 디렉토리 파일 {}개:", files.length);
+                for (File file : files) {
+                    log.info(" - {}: {} bytes", file.getName(), file.length());
+                }
+            } else {
+                log.info("업로드 디렉토리에 파일이 없거나 접근할 수 없습니다.");
+            }
+        }
+        
+        // uploads 디렉토리에 대한 리소스 핸들러 명시적으로 추가
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("classpath:/static/uploads/")
+                .setCachePeriod(0);
+        
+        // 파일 시스템 경로를 통한 접근도 제공 (개발 환경용)
+        try {
+            String absolutePath = uploadDirectory.getAbsolutePath();
+            registry.addResourceHandler("/uploads/**")
+                    .addResourceLocations("file:" + absolutePath + "/")
+                    .setCachePeriod(0);
+            log.info("파일 시스템 리소스 핸들러 추가: file:{}/", absolutePath);
+        } catch (Exception e) {
+            log.error("파일 시스템 리소스 핸들러 설정 오류: {}", e.getMessage());
+        }
+        
+        log.info("정적 리소스 핸들러 설정 완료");
     }
 } 

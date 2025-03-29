@@ -10,8 +10,12 @@
         <div class="container mt-4">
             <h2 th:text="${post.id != null} ? '게시글 수정' : '새 게시글 작성'">게시글 작성</h2>
             
-            <form th:action="${post.id != null} ? @{'/posts/' + ${post.id} + '/edit'} : @{/posts/new}" 
-                  method="post" th:object="${post}">
+            <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+            
+            <form method="post" 
+                  th:action="${post.id != null} ? @{'/posts/' + ${post.id} + '/edit'} : @{/posts/new}" 
+                  enctype="multipart/form-data"
+                  th:object="${post}">
                 <div class="mb-3">
                     <label for="title" class="form-label">제목</label>
                     <input type="text" class="form-control" id="title" th:field="*{title}" required>
@@ -24,6 +28,21 @@
                     <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
                 </div>
                 
+                <div class="mb-3">
+                    <label for="uploadFiles" class="form-label">이미지 첨부 (여러 파일 선택 가능)</label>
+                    <input type="file" class="form-control" id="uploadFiles" name="uploadFiles" multiple accept="image/*">
+                    <small class="form-text text-muted">허용된 형식: JPG, PNG, GIF 등 이미지 파일</small>
+                </div>
+                
+                <div class="mb-3" th:if="${post.id != null && post.imageFiles != null && !post.imageFiles.isEmpty()}">
+                    <label class="form-label">첨부된 이미지</label>
+                    <div class="d-flex flex-wrap">
+                        <div th:each="imagePath : ${post.getImageFilesList()}" class="me-2 mb-2">
+                            <img th:src="@{'/uploads/' + ${imagePath}}" class="img-thumbnail" style="max-height: 100px;">
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="d-flex justify-content-between">
                     <a th:href="${post.id != null} ? @{'/posts/' + ${post.id}} : @{/posts}" class="btn btn-secondary">취소</a>
                     <button type="submit" class="btn btn-primary">저장</button>
@@ -31,5 +50,20 @@
             </form>
         </div>
     </div>
+    
+    <script th:inline="javascript">
+        document.getElementById('uploadFiles').addEventListener('change', function(event) {
+            console.log('파일 선택됨:', event.target.files);
+            
+            for(let i = 0; i < event.target.files.length; i++) {
+                const file = event.target.files[i];
+                if(!file.type.startsWith('image/')) {
+                    alert('이미지 파일만 업로드 가능합니다.');
+                    this.value = '';
+                    return;
+                }
+            }
+        });
+    </script>
 </body>
 </html> 
