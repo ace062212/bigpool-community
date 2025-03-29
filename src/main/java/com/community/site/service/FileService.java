@@ -29,4 +29,11 @@ public interface FileService {
      * @throws IOException 파일 저장 중 오류 발생 시
      */
     List<String> saveImages(MultipartFile[] files) throws IOException;
+    
+    /**
+     * 파일을 삭제합니다.
+     * @param fileName 삭제할 파일명
+     * @return 삭제 성공 여부
+     */
+    boolean deleteImage(String fileName);
 } 

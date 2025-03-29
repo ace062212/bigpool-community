@@ -239,17 +239,33 @@
             <!-- 게시글 내용 -->
             <div class="post-content" th:if="${post != null}" th:utext="${post.content}">게시글 내용</div>
             
-            <!-- 새로운 방식 - 매우 간단하게 구현 -->
-            <div class="image-gallery" th:if="${post != null && post.imageFiles != null && !post.imageFiles.isEmpty()}">
+            <!-- 이미지 갤러리 (Firebase Storage URL 사용) -->
+            <div class="image-gallery" th:if="${imageUrls != null && !imageUrls.isEmpty()}">
                 <div class="row">
-                    <div class="col-md-12 mb-3" th:each="imagePath : ${post.getImageFilesList()}" th:if="${imagePath != null && !imagePath.isEmpty()}">
+                    <div class="col-md-12 mb-3" th:each="imageUrl, status : ${imageUrls}" th:if="${imageUrl != null && !imageUrl.isEmpty()}">
                         <div class="gallery-item">
-                            <img th:src="@{'/uploads/' + ${imagePath}}" 
+                            <img th:src="${imageUrl}" 
                                  class="img-fluid" 
                                  alt="첨부 이미지"
+                                 th:attr="data-image-index=${status.index + 1}"
                                  onclick="openImageViewer(this.src)">
                         </div>
                     </div>
+                </div>
+            </div>
+            
+            <!-- 이미지가 없거나 로드되지 않은 경우 표시 -->
+            <div class="alert alert-info" th:if="${imageUrls != null && imageUrls.isEmpty() && post.imageFiles != null && !post.imageFiles.isEmpty()}">
+                <i class="fas fa-info-circle me-2"></i>이미지를 불러오는 중 문제가 발생했습니다.
+            </div>
+            
+            <!-- 디버깅 정보 (개발 중에만 사용) -->
+            <div class="card mt-3 mb-3" th:if="${post.imageFiles != null && !post.imageFiles.isEmpty()}" style="display: none;">
+                <div class="card-header">디버깅 정보</div>
+                <div class="card-body">
+                    <p><strong>이미지 URL 목록:</strong> <span th:text="${imageUrls}"></span></p>
+                    <p><strong>이미지 파일 원본:</strong> <span th:text="${post.imageFiles}"></span></p>
+                    <p><strong>이미지 파일 리스트:</strong> <span th:text="${post.getImageFilesList()}"></span></p>
                 </div>
             </div>
             
@@ -334,6 +350,9 @@
     </div>
 
     <script th:inline="javascript">
+        const imageUrls = /*[[${imageUrls}]]*/ [];
+        console.log('이미지 URL 목록:', imageUrls);
+        
         function openImageModal(imageSrc) {
             console.log('이미지 모달 열기:', imageSrc);
             document.getElementById('modalImage').src = imageSrc;
@@ -342,27 +361,40 @@
         }
         
         function openImageViewer(src) {
+            console.log('이미지 뷰어 열기:', src);
             window.open(src, '_blank', 'width=800,height=600');
         }
         
         // 이미지 로딩 오류 처리
         document.addEventListener('DOMContentLoaded', function() {
-            // 모든 이미지 요소에 오류 처리 추가
-            var images = document.querySelectorAll('.gallery-item img');
+            console.log('문서 로드 완료, 이미지 오류 처리기 설정');
             
-            images.forEach(function(img) {
-                img.onerror = function() {
-                    console.error('이미지 로딩 실패:', this.src);
+            // 모든 이미지 요소에 오류 처리 추가
+            const images = document.querySelectorAll('.gallery-item img');
+            console.log(`이미지 요소 개수: ${images.length}`);
+            
+            images.forEach(function(img, index) {
+                console.log(`이미지 ${index+1} URL: ${img.src}`);
+                
+                img.addEventListener('load', function() {
+                    console.log(`이미지 ${index+1} 로드 성공: ${this.src}`);
+                });
+                
+                img.addEventListener('error', function() {
+                    console.error(`이미지 ${index+1} 로드 실패: ${this.src}`);
+                    
                     // 오류 시 대체 이미지 표시
                     this.src = '/images/error-image.png';
                     this.alt = '이미지 로딩 실패';
+                    this.style.width = '200px';
+                    this.style.height = 'auto';
                     
-                    // 부모 요소 표시 조정
-                    var galleryItem = this.closest('.gallery-item');
+                    // 부모 요소에 오류 메시지 추가
+                    const galleryItem = this.closest('.gallery-item');
                     if (galleryItem) {
-                        galleryItem.innerHTML += '<div class="text-danger mt-2">이미지를 불러올 수 없습니다.</div>';
+                        galleryItem.innerHTML += '<div class="alert alert-danger mt-2">이미지를 불러올 수 없습니다. Firebase Storage 설정을 확인하세요.</div>';
                     }
-                };
+                });
             });
         });
     </script>

@@ -29,3 +29,6 @@ h2db/
 logs/
 *.log
 uploads/
+
+# Firebase 서비스 계정 키 파일
+*firebase-adminsdk*.json

@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
 
 @Service
+@Primary
 public class FileServiceImpl implements FileService {
     
     private static final Logger log = LoggerFactory.getLogger(FileServiceImpl.class);
@@ -47,7 +49,7 @@ public class FileServiceImpl implements FileService {
     }
     
     @Override
-    public List<String> saveImages(List<MultipartFile> files) {
+    public List<String> saveImages(List<MultipartFile> files) throws IOException {
         List<String> fileNames = new ArrayList<>();
         
         if (files == null || files.isEmpty()) {
@@ -74,7 +76,7 @@ public class FileServiceImpl implements FileService {
     }
     
     @Override
-    public List<String> saveImages(MultipartFile[] files) {
+    public List<String> saveImages(MultipartFile[] files) throws IOException {
         List<String> fileNames = new ArrayList<>();
         
         if (files == null || files.length == 0) {
@@ -93,7 +95,7 @@ public class FileServiceImpl implements FileService {
     }
     
     @Override
-    public String saveImage(MultipartFile file) {
+    public String saveImage(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             log.warn("저장할 파일이 비어있습니다.");
             return null;
@@ -128,7 +130,45 @@ public class FileServiceImpl implements FileService {
             return newFileName;
         } catch (IOException e) {
             log.error("파일 저장 실패: {}", e.getMessage(), e);
-            return null;
+            throw e;
+        }
+    }
+    
+    @Override
+    public boolean deleteImage(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            log.warn("삭제할 파일명이 비어있습니다.");
+            return false;
+        }
+        
+        boolean success = true;
+        
+        try {
+            // 1. 외부 디렉토리에서 삭제
+            Path externalPath = Paths.get(externalUploadDir, fileName).toAbsolutePath();
+            boolean externalDeleted = Files.deleteIfExists(externalPath);
+            
+            if (externalDeleted) {
+                log.info("외부 경로에서 파일 삭제 완료: {}", externalPath);
+            } else {
+                log.warn("외부 경로에서 파일 삭제 실패 (파일 없음): {}", externalPath);
+                success = false;
+            }
+            
+            // 2. 정적 리소스 경로에서도 삭제
+            Path staticPath = Paths.get(staticUploadDir, fileName);
+            boolean staticDeleted = Files.deleteIfExists(staticPath);
+            
+            if (staticDeleted) {
+                log.info("정적 경로에서 파일 삭제 완료: {}", staticPath);
+            } else {
+                log.warn("정적 경로에서 파일 삭제 실패 (파일 없음): {}", staticPath);
+            }
+            
+            return success;
+        } catch (IOException e) {
+            log.error("파일 삭제 실패: {}", e.getMessage(), e);
+            return false;
         }
     }
 } 
