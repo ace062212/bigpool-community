@@ -13,6 +13,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.servlet.resource.CssLinkResourceTransformer;
+import org.springframework.web.servlet.resource.VersionResourceResolver;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -53,10 +55,27 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         log.info("정적 리소스 핸들러 설정 시작");
         
-        // 기본 정적 리소스
+        // 기본 정적 리소스 - 캐싱 적용 (1년)
         registry.addResourceHandler("/**")
                 .addResourceLocations("classpath:/static/")
-                .setCachePeriod(0);
+                .setCachePeriod(31536000) // 1년 (초 단위)
+                .resourceChain(true)
+                .addResolver(new VersionResourceResolver()
+                        .addContentVersionStrategy("/**"))
+                .addTransformer(new CssLinkResourceTransformer());
+        
+        // JavaScript 및 CSS 파일에 대한 특별 처리
+        registry.addResourceHandler("/js/**")
+                .addResourceLocations("classpath:/static/js/")
+                .setCachePeriod(31536000)
+                .resourceChain(true)
+                .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
+        
+        registry.addResourceHandler("/css/**")
+                .addResourceLocations("classpath:/static/css/")
+                .setCachePeriod(31536000)
+                .resourceChain(true)
+                .addResolver(new VersionResourceResolver().addContentVersionStrategy("/**"));
         
         // 내부 업로드 디렉토리 설정 (애플리케이션 내부)
         String staticUploadDir = "src/main/resources/static/uploads";
@@ -88,14 +107,14 @@ public class WebConfig implements WebMvcConfigurer {
         // 1. 내부 정적 리소스 경로 (개발 환경/배포 환경)
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("classpath:/static/uploads/")
-                .setCachePeriod(0);
+                .setCachePeriod(2592000);  // 30일 (초 단위)
         
         // 2. 외부 파일 시스템 경로 (서버 재시작해도 유지됨)
         try {
             String absolutePath = externalUploadDirectory.getAbsolutePath();
             registry.addResourceHandler("/uploads/**")
                     .addResourceLocations("file:" + absolutePath + "/")
-                    .setCachePeriod(0);
+                    .setCachePeriod(2592000);  // 30일 (초 단위)
             log.info("외부 파일 시스템 리소스 핸들러 추가: file:{}/", absolutePath);
         } catch (Exception e) {
             log.error("외부 파일 시스템 리소스 핸들러 설정 오류: {}", e.getMessage());

@@ -6,27 +6,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title layout:title-pattern="$CONTENT_TITLE - $LAYOUT_TITLE">BIGPOOL</title>
-    <!-- Bootstrap 5 CSS -->
+    
+    <!-- 중요 리소스 preload -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" as="script">
+    <link rel="preload" th:href="@{/css/effects.css}" as="style">
+    <link rel="preload" th:href="@{/css/components.css}" as="style">
+    <link rel="preload" th:href="@{/js/main.js}" as="script">
+    <link rel="preload" th:href="@{/js/components.js}" as="script">
+    
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    
+    <!-- CSS 스타일시트 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome 아이콘 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- 사용자 정의 CSS -->
     <link th:href="@{/css/style.css}" rel="stylesheet">
     <link th:href="@{/css/custom.css}" rel="stylesheet">
+    <link th:href="@{/css/effects.css}" rel="stylesheet">
+    <link th:href="@{/css/components.css}" rel="stylesheet">
+    
+    <!-- 중요한 인라인 스타일 - 첫 화면 렌더링에 필요 -->
     <style>
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f8f9fa;
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
         
         .navbar {
             padding: 1rem 0;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             background: linear-gradient(90deg, #0061f2 0%, #00c6f9 100%);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+            color: white;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.25rem;
+            position: relative;
+            color: white;
         }
         
         .navbar-brand {
@@ -169,16 +204,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0.9);
-            background: #fff;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-            z-index: 1060;
-            width: 90%;
-            max-width: 450px;
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 10px;
             padding: 2rem;
+            z-index: 1060;
             opacity: 0;
             transition: all 0.3s ease;
             display: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
         
         .login-modal.show {
@@ -188,33 +223,49 @@
         }
         
         .modal-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 1rem;
         }
         
         .modal-title {
             font-weight: 700;
-            color: #0061f2;
-            margin-bottom: 0.5rem;
+            color: #333;
         }
         
         .modal-close {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: transparent;
+            background: none;
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
-            color: #6c757d;
+            color: #999;
+            transition: color 0.3s ease;
         }
         
         .modal-close:hover {
-            color: #0061f2;
+            color: #333;
         }
     </style>
     <th:block layout:fragment="css"></th:block>
+    
+    <!-- 페이지 로딩 최적화를 위한 설정 -->
+    <script>
+        // CSS 파일 지연 로드
+        function loadDeferred(url) {
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = url;
+            document.head.appendChild(link);
+        }
+        
+        // DOMContentLoaded 이후에 중요하지 않은 CSS 로드
+        document.addEventListener('DOMContentLoaded', function() {
+            // 여기에 추가 CSS 파일 로드 가능
+        });
+    </script>
 </head>
 <body>
     <!-- 로그인 전환 효과를 위한 오버레이 -->
@@ -235,16 +286,16 @@
         </div>
         <form th:action="@{/login}" method="post" id="loginForm">
             <div class="mb-3">
-                <label for="username" class="form-label">아이디</label>
-                <input type="text" class="form-control" id="username" name="username" required>
+                <label for="loginUsername" class="form-label">아이디</label>
+                <input type="text" class="form-control" id="loginUsername" name="username" required autofocus>
             </div>
             <div class="mb-3">
-                <label for="password" class="form-label">비밀번호</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+                <label for="loginPassword" class="form-label">비밀번호</label>
+                <input type="password" class="form-control" id="loginPassword" name="password" required>
             </div>
             <div class="mb-3 form-check">
-                <input type="checkbox" class="form-check-input" id="rememberMe" name="remember-me">
-                <label class="form-check-label" for="rememberMe">자동 로그인</label>
+                <input type="checkbox" class="form-check-input" id="remember-me" name="remember-me">
+                <label class="form-check-label" for="remember-me">로그인 상태 유지</label>
             </div>
             <button type="submit" class="btn btn-primary w-100 mb-3" style="background: linear-gradient(90deg, #0061f2 0%, #00c6f9 100%); border: none;">로그인</button>
             <div class="text-center">
@@ -349,253 +400,15 @@
         </div>
     </footer>
 
-    <!-- Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 사용자 아바타의 이니셜 설정
-            const userInitials = document.querySelectorAll('.user-initial');
-            userInitials.forEach(element => {
-                if(element.textContent) {
-                    element.textContent = element.textContent.charAt(0).toUpperCase();
-                }
-            });
-            
-            // 로그인/회원가입 모달 제어
-            const modalBackdrop = document.querySelector('.modal-backdrop');
-            const loginModal = document.getElementById('loginModal');
-            const registerModal = document.getElementById('registerModal');
-            const loginBtns = document.querySelectorAll('.btn-login');
-            const registerBtns = document.querySelectorAll('.btn-register:not(#logoutBtn)'); // 로그아웃 버튼 제외
-            const closeBtns = document.querySelectorAll('.modal-close');
-            
-            // 모달과 배경 완전히 닫기 함수
-            function closeAllModals() {
-                // 모달 닫기
-                modalBackdrop.classList.remove('show');
-                loginModal.classList.remove('show');
-                registerModal.classList.remove('show');
-                
-                // 기존에 생성된 다른 오버레이 요소들도 정리
-                const existingOverlays = document.querySelectorAll('.login-transition-overlay:not(.active)');
-                existingOverlays.forEach(overlay => {
-                    if (overlay && overlay.parentNode) {
-                        overlay.parentNode.removeChild(overlay);
-                    }
-                });
-            }
-            
-            // 로그인 모달 열기
-            if (loginBtns) {
-                loginBtns.forEach(btn => {
-                    if (!btn.classList.contains('profile-link')) { // 프로필 링크 제외
-                        btn.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            closeAllModals(); // 먼저 모든 모달 닫기
-                            modalBackdrop.classList.add('show');
-                            loginModal.classList.add('show');
-                        });
-                    }
-                });
-            }
-            
-            // 회원가입 모달 열기
-            if (registerBtns) {
-                registerBtns.forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        closeAllModals(); // 먼저 모든 모달 닫기
-                        modalBackdrop.classList.add('show');
-                        registerModal.classList.add('show');
-                    });
-                });
-            }
-            
-            // 모달 닫기
-            if (closeBtns) {
-                closeBtns.forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        closeAllModals();
-                    });
-                });
-            }
-            
-            // 배경 클릭 시 모달 닫기
-            if (modalBackdrop) {
-                modalBackdrop.addEventListener('click', function() {
-                    closeAllModals();
-                });
-            }
-            
-            // 회원가입 모달에서 로그인 모달로 전환
-            const showLoginBtn = document.querySelector('.btn-show-login');
-            if (showLoginBtn) {
-                showLoginBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    registerModal.classList.remove('show');
-                    loginModal.classList.add('show');
-                });
-            }
-            
-            // 로그인 모달에서 회원가입 모달로 전환
-            const showRegisterBtn = document.querySelector('.btn-show-register');
-            if (showRegisterBtn) {
-                showRegisterBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    loginModal.classList.remove('show');
-                    registerModal.classList.add('show');
-                });
-            }
-            
-            // 페이지 로드 시 모든 모달 닫기
-            closeAllModals();
-            
-            // ESC 키 누를 때 모달 닫기
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeAllModals();
-                }
-            });
-            
-            // 로그인 폼 제출 시 애니메이션 효과
-            const loginForm = document.getElementById('loginForm');
-            if (loginForm) {
-                loginForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    closeAllModals();
-                    
-                    // 기존 오버레이 제거
-                    const existingOverlays = document.querySelectorAll('.login-transition-overlay');
-                    existingOverlays.forEach(overlay => {
-                        if (overlay && overlay.parentNode) {
-                            overlay.parentNode.removeChild(overlay);
-                        }
-                    });
-                    
-                    // 새 오버레이 생성
-                    const overlay = document.createElement('div');
-                    overlay.className = 'login-transition-overlay';
-                    document.body.appendChild(overlay);
-                    
-                    // 환영 메시지 생성
-                    const welcomeMsg = document.createElement('div');
-                    welcomeMsg.className = 'welcome-message';
-                    welcomeMsg.textContent = '환영합니다!';
-                    document.body.appendChild(welcomeMsg);
-                    
-                    setTimeout(() => {
-                        overlay.classList.add('active');
-                        
-                        // 파도 애니메이션이 어느 정도 진행된 후 환영 메시지 표시
-                        setTimeout(() => {
-                            welcomeMsg.classList.add('show');
-                            
-                            // 환영 메시지가 표시된 후, 일정 시간 뒤에 폼 제출
-                            setTimeout(() => {
-                                this.submit();
-                            }, 1500);
-                        }, 500);
-                    }, 10);
-                });
-            }
-            
-            // 회원가입 폼 제출 시 애니메이션 효과
-            const registerForm = document.getElementById('registerForm');
-            if (registerForm) {
-                registerForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    closeAllModals();
-                    
-                    // 기존 오버레이 제거
-                    const existingOverlays = document.querySelectorAll('.login-transition-overlay');
-                    existingOverlays.forEach(overlay => {
-                        if (overlay && overlay.parentNode) {
-                            overlay.parentNode.removeChild(overlay);
-                        }
-                    });
-                    
-                    // 새 오버레이 생성
-                    const overlay = document.createElement('div');
-                    overlay.className = 'login-transition-overlay';
-                    document.body.appendChild(overlay);
-                    
-                    // 환영 메시지 생성
-                    const welcomeMsg = document.createElement('div');
-                    welcomeMsg.className = 'welcome-message';
-                    welcomeMsg.textContent = 'BIGPOOL에 오신 것을 환영합니다!';
-                    document.body.appendChild(welcomeMsg);
-                    
-                    setTimeout(() => {
-                        overlay.classList.add('active');
-                        
-                        // 파도 애니메이션이 어느 정도 진행된 후 환영 메시지 표시
-                        setTimeout(() => {
-                            welcomeMsg.classList.add('show');
-                            
-                            // 환영 메시지가 표시된 후, 일정 시간 뒤에 폼 제출
-                            setTimeout(() => {
-                                this.submit();
-                            }, 1500);
-                        }, 500);
-                    }, 10);
-                });
-            }
-            
-            // 로그아웃 버튼 클릭 이벤트
-            const logoutBtn = document.getElementById('logoutBtn');
-            const logoutForm = document.getElementById('logoutForm');
-            if (logoutBtn && logoutForm) {
-                logoutBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    closeAllModals();
-                    
-                    // 기존 오버레이 제거
-                    const existingOverlays = document.querySelectorAll('.login-transition-overlay');
-                    existingOverlays.forEach(overlay => {
-                        if (overlay && overlay.parentNode) {
-                            overlay.parentNode.removeChild(overlay);
-                        }
-                    });
-                    
-                    // 새 오버레이 생성
-                    const overlay = document.createElement('div');
-                    overlay.className = 'login-transition-overlay';
-                    document.body.appendChild(overlay);
-                    
-                    // 로그아웃 메시지 생성
-                    const logoutMsg = document.createElement('div');
-                    logoutMsg.className = 'logout-message';
-                    logoutMsg.textContent = '다음에 또 봐요!';
-                    document.body.appendChild(logoutMsg);
-                    
-                    setTimeout(() => {
-                        overlay.classList.add('active');
-                        
-                        // 파도 애니메이션이 어느 정도 진행된 후 로그아웃 메시지 표시
-                        setTimeout(() => {
-                            logoutMsg.classList.add('show');
-                            
-                            // 일정 시간 후 로그아웃 폼 제출
-                            setTimeout(() => {
-                                logoutForm.submit();
-                            }, 1500);
-                        }, 500);
-                    }, 10);
-                });
-            }
-            
-            // 현재 활성 페이지 메뉴 강조
-            const currentLocation = window.location.pathname;
-            const navLinks = document.querySelectorAll('.nav-link');
-            navLinks.forEach(link => {
-                const href = link.getAttribute('href').replace('@{', '').replace('}', '');
-                if ((href === '/' && currentLocation === '/') || 
-                    (href !== '/' && currentLocation.includes(href))) {
-                    link.classList.add('active');
-                }
-            });
-        });
-    </script>
+    <!-- JavaScript 로딩 최적화 -->
+    <!-- 필수 JavaScript는 비동기로 로드 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" defer></script>
+    
+    <!-- 컴포넌트 및 기능 스크립트 -->
+    <script th:src="@{/js/components.js}" defer></script>
+    <script th:src="@{/js/main.js}" defer></script>
+    
+    <!-- 페이지별 스크립트 -->
     <th:block layout:fragment="script"></th:block>
 </body>
 </html> 
