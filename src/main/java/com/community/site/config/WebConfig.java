@@ -58,46 +58,64 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/static/")
                 .setCachePeriod(0);
         
-        // 업로드 디렉토리 설정
-        String uploadDir = "src/main/resources/static/uploads";
-        File uploadDirectory = new File(uploadDir);
+        // 내부 업로드 디렉토리 설정 (애플리케이션 내부)
+        String staticUploadDir = "src/main/resources/static/uploads";
+        File staticUploadDirectory = new File(staticUploadDir);
         
-        if (!uploadDirectory.exists()) {
-            uploadDirectory.mkdirs();
-            log.info("업로드 디렉토리 생성: {}", uploadDirectory.getAbsolutePath());
+        if (!staticUploadDirectory.exists()) {
+            staticUploadDirectory.mkdirs();
+            log.info("내부 업로드 디렉토리 생성: {}", staticUploadDirectory.getAbsolutePath());
         }
         
-        log.info("업로드 디렉토리 경로: {}", uploadDirectory.getAbsolutePath());
+        log.info("내부 업로드 디렉토리 경로: {}", staticUploadDirectory.getAbsolutePath());
         
-        // 업로드 디렉토리 내 파일 목록 확인
-        if (uploadDirectory.exists() && uploadDirectory.isDirectory()) {
-            File[] files = uploadDirectory.listFiles();
-            if (files != null) {
-                log.info("현재 업로드 디렉토리 파일 {}개:", files.length);
-                for (File file : files) {
-                    log.info(" - {}: {} bytes", file.getName(), file.length());
-                }
-            } else {
-                log.info("업로드 디렉토리에 파일이 없거나 접근할 수 없습니다.");
-            }
+        // 외부 업로드 디렉토리 설정 (애플리케이션 외부 - 재시작해도 유지됨)
+        String externalUploadDir = "uploads";
+        File externalUploadDirectory = new File(externalUploadDir);
+        
+        if (!externalUploadDirectory.exists()) {
+            externalUploadDirectory.mkdirs();
+            log.info("외부 업로드 디렉토리 생성: {}", externalUploadDirectory.getAbsolutePath());
         }
+        
+        log.info("외부 업로드 디렉토리 경로: {}", externalUploadDirectory.getAbsolutePath());
+        
+        // 파일 목록 로깅
+        logDirectoryContents(staticUploadDirectory, "내부");
+        logDirectoryContents(externalUploadDirectory, "외부");
         
         // uploads 디렉토리에 대한 리소스 핸들러 명시적으로 추가
+        // 1. 내부 정적 리소스 경로 (개발 환경/배포 환경)
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("classpath:/static/uploads/")
                 .setCachePeriod(0);
         
-        // 파일 시스템 경로를 통한 접근도 제공 (개발 환경용)
+        // 2. 외부 파일 시스템 경로 (서버 재시작해도 유지됨)
         try {
-            String absolutePath = uploadDirectory.getAbsolutePath();
+            String absolutePath = externalUploadDirectory.getAbsolutePath();
             registry.addResourceHandler("/uploads/**")
                     .addResourceLocations("file:" + absolutePath + "/")
                     .setCachePeriod(0);
-            log.info("파일 시스템 리소스 핸들러 추가: file:{}/", absolutePath);
+            log.info("외부 파일 시스템 리소스 핸들러 추가: file:{}/", absolutePath);
         } catch (Exception e) {
-            log.error("파일 시스템 리소스 핸들러 설정 오류: {}", e.getMessage());
+            log.error("외부 파일 시스템 리소스 핸들러 설정 오류: {}", e.getMessage());
         }
         
         log.info("정적 리소스 핸들러 설정 완료");
+    }
+    
+    // 디렉토리 내용 로깅 유틸리티 메서드
+    private void logDirectoryContents(File directory, String dirType) {
+        if (directory.exists() && directory.isDirectory()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                log.info("현재 {}용 업로드 디렉토리 파일 {}개:", dirType, files.length);
+                for (File file : files) {
+                    log.info(" - {}: {} bytes", file.getName(), file.length());
+                }
+            } else {
+                log.info("{}용 업로드 디렉토리에 파일이 없거나 접근할 수 없습니다.", dirType);
+            }
+        }
     }
 } 

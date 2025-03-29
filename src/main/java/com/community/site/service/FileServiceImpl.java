@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -20,13 +21,26 @@ import org.slf4j.LoggerFactory;
 public class FileServiceImpl implements FileService {
     
     private static final Logger log = LoggerFactory.getLogger(FileServiceImpl.class);
-    private final String uploadDir = "src/main/resources/static/uploads";
+    
+    @Value("${file.upload-dir:uploads}")
+    private String uploadDirProperty;
+    
+    // 애플리케이션 외부 경로 (서버 재시작 후에도 유지됨)
+    private final String externalUploadDir = "uploads";
+    
+    // 정적 리소스 경로 (개발 환경용)
+    private final String staticUploadDir = "src/main/resources/static/uploads";
     
     @PostConstruct
     public void init() {
         try {
-            Files.createDirectories(Paths.get(uploadDir));
-            log.info("업로드 디렉토리 생성 완료: {}", uploadDir);
+            // 외부 디렉토리 생성
+            Files.createDirectories(Paths.get(externalUploadDir));
+            log.info("외부 업로드 디렉토리 생성 완료: {}", externalUploadDir);
+            
+            // 정적 리소스 디렉토리 생성 (개발 환경용)
+            Files.createDirectories(Paths.get(staticUploadDir));
+            log.info("정적 업로드 디렉토리 생성 완료: {}", staticUploadDir);
         } catch (IOException e) {
             log.error("업로드 디렉토리 생성 실패: {}", e.getMessage());
         }
@@ -97,12 +111,19 @@ public class FileServiceImpl implements FileService {
             // UUID로 새 파일명 생성 (확장자 유지)
             String newFileName = UUID.randomUUID().toString() + extension;
             
-            // 파일 저장 경로 설정
-            Path targetPath = Paths.get(uploadDir, newFileName);
+            // 1. 외부 디렉토리에 저장 (서버 재시작 후에도 유지됨)
+            Path externalPath = Paths.get(externalUploadDir, newFileName).toAbsolutePath();
+            Files.copy(file.getInputStream(), externalPath, StandardCopyOption.REPLACE_EXISTING);
+            log.info("외부 경로에 파일 저장 완료: {} -> {}", originalFilename, externalPath);
             
-            // 파일 저장
-            Files.copy(file.getInputStream(), targetPath);
-            log.info("파일 저장 완료: {} -> {}", originalFilename, newFileName);
+            // 2. 정적 리소스 경로에도 복사 (개발 환경용)
+            try {
+                Path staticPath = Paths.get(staticUploadDir, newFileName);
+                Files.copy(file.getInputStream(), staticPath, StandardCopyOption.REPLACE_EXISTING);
+                log.info("정적 경로에 파일 복사 완료: {}", staticPath);
+            } catch (IOException e) {
+                log.warn("정적 경로에 파일 복사 실패 (무시됨): {}", e.getMessage());
+            }
             
             return newFileName;
         } catch (IOException e) {
