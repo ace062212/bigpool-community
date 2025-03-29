@@ -16,6 +16,10 @@
                   th:action="${post.id != null} ? @{'/posts/' + ${post.id} + '/edit'} : @{/posts/new}" 
                   enctype="multipart/form-data"
                   th:object="${post}">
+                
+                <!-- 폼 토큰 - 중복 제출 방지 -->
+                <input type="hidden" name="formToken" th:value="${formToken}" />
+                
                 <div class="mb-3">
                     <label for="title" class="form-label">제목</label>
                     <input type="text" class="form-control" id="title" th:field="*{title}" required>
@@ -55,6 +59,9 @@
     </div>
     
     <script th:inline="javascript">
+        // 폼 제출 여부 플래그
+        let isSubmitting = false;
+        
         document.getElementById('uploadFiles').addEventListener('change', function(event) {
             console.log('파일 선택됨:', event.target.files);
             
@@ -68,25 +75,55 @@
             }
         });
         
-        document.querySelector('form').addEventListener('submit', function(event) {
+        // 페이지를 떠날 때 경고 메시지 표시
+        window.addEventListener('beforeunload', function(e) {
+            if (isSubmitting) {
+                e.preventDefault();
+                e.returnValue = '게시글 저장 중입니다. 페이지를 떠나시겠습니까?';
+                return e.returnValue;
+            }
+        });
+        
+        // 폼 제출 시 중복 제출 방지
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(event) {
+            // 이미 제출 중이면 폼 제출 차단
+            if (isSubmitting) {
+                event.preventDefault();
+                return false;
+            }
+            
+            // 버튼 및 상태 요소
             const submitButton = document.getElementById('submitButton');
             const submitSpinner = document.getElementById('submitSpinner');
             const submitText = document.getElementById('submitText');
             
-            if (submitButton.disabled) {
-                event.preventDefault();
-                return;
+            // 폼 유효성 검사
+            if (!form.checkValidity()) {
+                return false;
             }
             
+            // 제출 상태로 변경
+            isSubmitting = true;
+            
+            // 버튼 상태 변경
             submitButton.disabled = true;
             submitSpinner.classList.remove('d-none');
             submitText.textContent = '저장 중...';
             
+            // 폼이 제출된 후 10초가 지나도 응답이 없으면 타임아웃으로 간주하고 버튼 재활성화
             setTimeout(function() {
-                submitButton.disabled = false;
-                submitSpinner.classList.add('d-none');
-                submitText.textContent = '저장';
-            }, 5000);
+                if (isSubmitting) {
+                    isSubmitting = false;
+                    submitButton.disabled = false;
+                    submitSpinner.classList.add('d-none');
+                    submitText.textContent = '저장';
+                    alert('서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요.');
+                }
+            }, 10000);
+            
+            // 폼 제출 처리
+            return true;
         });
     </script>
 </body>

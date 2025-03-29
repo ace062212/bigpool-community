@@ -7,6 +7,7 @@ import com.community.site.service.CommentService;
 import com.community.site.service.FileService;
 import com.community.site.service.PostService;
 import com.community.site.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ import java.nio.file.Paths;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/posts")
@@ -168,8 +170,14 @@ public class PostController {
 
     @GetMapping("/new")
     @PreAuthorize("isAuthenticated()")
-    public String newPostForm(Model model) {
+    public String newPostForm(Model model, HttpSession session) {
         model.addAttribute("post", new Post());
+        
+        // 폼 제출 토큰 생성 및 세션에 저장
+        String formToken = UUID.randomUUID().toString();
+        session.setAttribute("postFormToken", formToken);
+        model.addAttribute("formToken", formToken);
+        
         return "post/form";
     }
 
@@ -178,14 +186,28 @@ public class PostController {
     public String createPost(@Valid @ModelAttribute("post") Post post,
                             BindingResult result,
                             @RequestParam(value = "uploadFiles", required = false) MultipartFile[] uploadFiles,
+                            @RequestParam(value = "formToken", required = false) String formToken,
                             Principal principal,
                             Model model,
-                            RedirectAttributes redirectAttributes) {
+                            RedirectAttributes redirectAttributes,
+                            HttpSession session) {
         
         System.out.println("===== createPost 메서드 시작 =====");
         
+        // 폼 토큰 검증 - 중복 제출 방지
+        String sessionToken = (String) session.getAttribute("postFormToken");
+        if (sessionToken == null || !sessionToken.equals(formToken)) {
+            System.out.println("폼 토큰 불일치 - 중복 제출 또는 세션 만료");
+            redirectAttributes.addFlashAttribute("error", "세션이 만료되었거나 이미 처리된 요청입니다. 다시 시도해주세요.");
+            return "redirect:/posts";
+        }
+        
+        // 토큰 사용 후 제거 (재사용 방지)
+        session.removeAttribute("postFormToken");
+        
         if (result.hasErrors()) {
             System.out.println("폼 검증 오류 발생: " + result.getAllErrors());
+            model.addAttribute("formToken", formToken); // 폼 재제출시 토큰 유지
             return "post/form";
         }
         
@@ -251,13 +273,19 @@ public class PostController {
             e.printStackTrace();
             model.addAttribute("error", "게시글 저장 중 오류가 발생했습니다: " + e.getMessage());
             model.addAttribute("post", post); // 작성 중이던 글 데이터 유지
+            
+            // 토큰 재생성하여 모델에 추가
+            String newFormToken = UUID.randomUUID().toString();
+            session.setAttribute("postFormToken", newFormToken);
+            model.addAttribute("formToken", newFormToken);
+            
             return "post/form";
         }
     }
 
     @GetMapping("/{id}/edit")
     @PreAuthorize("isAuthenticated()")
-    public String editPostForm(@PathVariable Long id, Model model, Principal principal) {
+    public String editPostForm(@PathVariable Long id, Model model, Principal principal, HttpSession session) {
         Post post = postService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
         
@@ -270,6 +298,11 @@ public class PostController {
             throw new IllegalArgumentException("게시글을 수정할 권한이 없습니다.");
         }
         
+        // 폼 제출 토큰 생성 및 세션에 저장
+        String formToken = UUID.randomUUID().toString();
+        session.setAttribute("editPostFormToken", formToken);
+        model.addAttribute("formToken", formToken);
+        
         model.addAttribute("post", post);
         return "post/form";
     }
@@ -280,9 +313,24 @@ public class PostController {
                             @Valid @ModelAttribute Post post,
                             BindingResult result,
                             @RequestParam(value = "uploadFiles", required = false) MultipartFile[] uploadFiles,
+                            @RequestParam(value = "formToken", required = false) String formToken,
                             Principal principal,
+                            HttpSession session,
+                            Model model,
                             RedirectAttributes redirectAttributes) {
+        
+        // 폼 토큰 검증 - 중복 제출 방지
+        String sessionToken = (String) session.getAttribute("editPostFormToken");
+        if (sessionToken == null || !sessionToken.equals(formToken)) {
+            redirectAttributes.addFlashAttribute("error", "세션이 만료되었거나 이미 처리된 요청입니다. 다시 시도해주세요.");
+            return "redirect:/posts/" + id;
+        }
+        
+        // 토큰 사용 후 제거 (재사용 방지)
+        session.removeAttribute("editPostFormToken");
+                            
         if (result.hasErrors()) {
+            model.addAttribute("formToken", formToken); // 폼 재제출시 토큰 유지
             return "post/form";
         }
         
