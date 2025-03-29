@@ -28,3 +28,4 @@ h2db/
 *.db
 logs/
 *.log
+uploads/
