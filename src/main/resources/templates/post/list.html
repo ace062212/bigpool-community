@@ -87,6 +87,39 @@
             color: #0061f2;
             margin-bottom: 1rem;
         }
+        
+        /* 페이지네이션 스타일 */
+        .pagination-container {
+            margin-top: 2rem;
+        }
+        
+        .pagination .page-link {
+            color: #0061f2;
+            border: 1px solid #dee2e6;
+            padding: 0.5rem 0.75rem;
+            margin: 0 0.25rem;
+            border-radius: 0.25rem;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: #0061f2;
+            border-color: #0061f2;
+            color: white;
+        }
+        
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+        
+        .pagination .page-link:hover {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+            color: #004bbf;
+        }
     </style>
 </head>
 <body>
@@ -129,6 +162,54 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+            
+            <!-- 페이지네이션 추가 -->
+            <div th:if="${posts != null && !posts.empty}" class="pagination-container mt-4 mb-5">
+                <nav aria-label="게시글 페이지네이션">
+                    <ul class="pagination justify-content-center">
+                        <!-- 첫 페이지로 -->
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/posts(page=0, size=10, search=${search})}" aria-label="처음">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        
+                        <!-- 이전 페이지로 -->
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/posts(page=${currentPage - 1}, size=10, search=${search})}" aria-label="이전">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        
+                        <!-- 페이지 숫자 -->
+                        <li class="page-item" th:each="i: ${#numbers.sequence(0, totalPages - 1)}" 
+                            th:if="${i >= currentPage - 2 && i <= currentPage + 2}"
+                            th:classappend="${currentPage == i} ? 'active'">
+                            <a class="page-link" th:href="@{/posts(page=${i}, size=10, search=${search})}" th:text="${i + 1}">1</a>
+                        </li>
+                        
+                        <!-- 다음 페이지로 -->
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/posts(page=${currentPage + 1}, size=10, search=${search})}" aria-label="다음">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        
+                        <!-- 마지막 페이지로 -->
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/posts(page=${totalPages - 1}, size=10, search=${search})}" aria-label="마지막">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="text-center">
+                    <small class="text-muted">
+                        총 <span th:text="${posts.totalElements}">0</span>개의 게시글 | 
+                        <span th:text="${currentPage + 1}">1</span> / <span th:text="${totalPages}">1</span> 페이지
+                    </small>
                 </div>
             </div>
         </div>

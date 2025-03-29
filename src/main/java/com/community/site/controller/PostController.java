@@ -51,6 +51,9 @@ public class PostController {
                            @RequestParam(required = false) String search) {
         
         try {
+            // 페이지 크기 고정 (10개로 설정)
+            size = 10;
+            
             Page<Post> posts;
             if (search != null && !search.isEmpty()) {
                 posts = postService.searchPosts(search, 
