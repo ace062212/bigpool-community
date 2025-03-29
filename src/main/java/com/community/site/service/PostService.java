@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public interface PostService {
     Post createPost(Post post);
@@ -16,4 +17,8 @@ public interface PostService {
     Post updatePost(Post post);
     void deletePost(Long id);
     Post incrementViewCount(Long id);
+    
+    // 비동기 조회 메서드
+    CompletableFuture<Page<Post>> findAllPostsAsync(Pageable pageable);
+    CompletableFuture<Page<Post>> searchPostsAsync(String keyword, Pageable pageable);
 } 

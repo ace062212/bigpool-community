@@ -1,0 +1,15 @@
+dependencies {
+    // ... existing dependencies ...
+    
+    // 캐싱 관련 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+    
+    // 비동기 처리 지원
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    
+    // 압축 관련 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    
+    // ... existing dependencies ...
+} 

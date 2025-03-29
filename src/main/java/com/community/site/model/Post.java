@@ -93,40 +93,21 @@ public class Post {
         return imageFiles;
     }
     
-    // 이미지 파일 경로 목록으로 변환
+    /**
+     * 이미지 파일 목록을 쉼표로 구분된 문자열에서 리스트로 변환하여 반환
+     */
     public List<String> getImageFilesList() {
-        if (imageFiles == null || imageFiles.isEmpty()) {
-            System.out.println("getImageFilesList: 이미지 파일 없음");
-            return new ArrayList<>();
-        }
-        
-        try {
-            System.out.println("getImageFilesList: 원본 이미지 경로 = " + imageFiles);
-            
-            List<String> paths = new ArrayList<>();
-            String[] imagePathsArray = imageFiles.split(",");
-            
-            System.out.println("getImageFilesList: 분리된 이미지 경로 개수 = " + imagePathsArray.length);
-            
-            for (String path : imagePathsArray) {
-                if (path != null && !path.trim().isEmpty()) {
-                    // 경로에서 파일명만 추출 (만약 전체 경로가 저장되어 있다면)
-                    String fileName = path.trim();
-                    if (fileName.contains("/")) {
-                        fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
-                    }
-                    paths.add(fileName);
-                    System.out.println("getImageFilesList: 추가된 이미지 파일명 = " + fileName);
+        List<String> result = new ArrayList<>();
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            String[] files = imageFiles.split(",");
+            for (String file : files) {
+                String trimmed = file.trim();
+                if (!trimmed.isEmpty()) {
+                    result.add(trimmed);
                 }
             }
-            
-            System.out.println("getImageFilesList: 총 " + paths.size() + "개의 이미지 경로 반환");
-            return paths;
-        } catch (Exception e) {
-            System.err.println("이미지 파일 경로 변환 오류: " + e.getMessage());
-            e.printStackTrace();
-            return new ArrayList<>();
         }
+        return result;
     }
     
     // Setters
@@ -164,5 +145,39 @@ public class Post {
     
     public void setImageFiles(String imageFiles) {
         this.imageFiles = imageFiles;
+    }
+    
+    /**
+     * 이미지 파일 목록을 문자열로 설정 (쉼표로 구분)
+     */
+    public void setImageFilesList(List<String> files) {
+        if (files == null || files.isEmpty()) {
+            this.imageFiles = null;
+            return;
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < files.size(); i++) {
+            sb.append(files.get(i));
+            if (i < files.size() - 1) {
+                sb.append(",");
+            }
+        }
+        this.imageFiles = sb.toString();
+    }
+    
+    /**
+     * 이미지 파일 추가
+     */
+    public void addImageFile(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            return;
+        }
+        
+        if (this.imageFiles == null || this.imageFiles.isEmpty()) {
+            this.imageFiles = fileName;
+        } else {
+            this.imageFiles += "," + fileName;
+        }
     }
 } 
