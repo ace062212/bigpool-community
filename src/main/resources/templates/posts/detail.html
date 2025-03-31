@@ -1,0 +1,37 @@
+<div class="post-content">
+    <p th:text="${post.content}"></p>
+</div>
+
+<!-- 추천/비추천 버튼 추가 -->
+<div class="vote-buttons mt-3" th:if="${#authorization.expression('isAuthenticated()')}">
+    <button class="btn btn-success me-2" onclick="vote(true)" id="upvoteBtn">
+        👍 추천 <span id="upvoteCount" th:text="${upvoteCount}">0</span>
+    </button>
+    <button class="btn btn-danger" onclick="vote(false)" id="downvoteBtn">
+        👎 비추천 <span id="downvoteCount" th:text="${downvoteCount}">0</span>
+    </button>
+</div>
+
+<script th:inline="javascript">
+    function vote(isUpvote) {
+        const postId = /*[[${post.id}]]*/ null;
+        const url = `/api/posts/${postId}/${isUpvote ? 'upvote' : 'downvote'}`;
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+            }
+        })
+        .then(response => response.text())
+        .then(message => {
+            alert(message);
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('투표 중 오류가 발생했습니다.');
+        });
+    }
+</script> 

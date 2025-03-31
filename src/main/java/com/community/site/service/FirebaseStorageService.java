@@ -36,6 +36,13 @@ public class FirebaseStorageService implements FileService {
                 originalFilename = "unknown.jpg";
             }
             
+            // HEIC 형식 체크
+            boolean isHeicFormat = originalFilename.toLowerCase().endsWith(".heic");
+            if (isHeicFormat) {
+                logger.warn("HEIC 파일 형식이 감지되었습니다. 이 형식은 완전히 지원되지 않을 수 있습니다: {}", originalFilename);
+                // HEIC 파일을 JPEG로 변환하는 코드가 필요합니다 (현재 미구현)
+            }
+            
             String extension = "";
             if (originalFilename.contains(".")) {
                 extension = originalFilename.substring(originalFilename.lastIndexOf("."));

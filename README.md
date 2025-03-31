@@ -36,7 +36,18 @@
 
 - JDK 17 이상
 - Maven
+# 1. 변경된 파일 확인 (선택 사항)
+git status
 
+# 2. 변경된 파일 스테이징에 추가
+git add .
+
+# 3. 변경사항 커밋하기
+git commit -m "이미지 저장소 생성"
+
+# 4. GitHub 원격 저장소에 푸시
+git push origin main
+###########################################
 ### 빌드 및 실행
 
 1. 프로젝트 클론 또는 다운로드
@@ -52,11 +63,13 @@ mvn clean package -DskipTests
 
 ### 애플리케이션 실행
 ```bash
+mvn clean package -DskipTests
 java -jar target/site-0.0.1-SNAPSHOT.jar
 ```
 ### 서버 닫기 
 lsof -i :8080 | grep java
-kill -9 "" ("" 안에는 lsof -i :8080 | grep java 실행후에 기입해야함)
+kill -9     "" 
+("" 안에는 lsof -i :8080 | grep java 실행후에 기입해야함)
 
 ### 브라우저에서 접속
 ```
