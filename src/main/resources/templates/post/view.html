@@ -241,20 +241,6 @@
             <!-- 게시글 내용 -->
             <div class="post-content" th:if="${post != null}" th:utext="${post.content}">게시글 내용</div>
             
-            <!-- 추천/비추천 버튼 추가 -->
-            <div class="vote-buttons mb-4" sec:authorize="isAuthenticated()">
-                <div class="d-flex gap-2">
-                    <button type="button" th:class="${hasUpvoted ? 'btn btn-success active' : 'btn btn-outline-success'}" 
-                            th:onclick="|votePost(${post.id}, true)|">
-                        👍 추천 <span id="upvoteCount" th:text="${upvoteCount}">0</span>
-                    </button>
-                    <button type="button" th:class="${hasDownvoted ? 'btn btn-danger active' : 'btn btn-outline-danger'}" 
-                            th:onclick="|votePost(${post.id}, false)|">
-                        👎 비추천 <span id="downvoteCount" th:text="${downvoteCount}">0</span>
-                    </button>
-                </div>
-            </div>
-            
             <!-- 이미지 갤러리 (Firebase Storage URL 사용) -->
             <div class="image-gallery" th:if="${imageUrls != null && !imageUrls.isEmpty()}">
                 <div class="row">
@@ -273,6 +259,20 @@
             <!-- 이미지가 없거나 로드되지 않은 경우 표시 -->
             <div class="alert alert-info" th:if="${imageUrls != null && imageUrls.isEmpty() && post.imageFiles != null && !post.imageFiles.isEmpty()}">
                 <i class="fas fa-info-circle me-2"></i>이미지를 불러오는 중 문제가 발생했습니다.
+            </div>
+            
+            <!-- 추천/비추천 버튼 추가 - 이미지 아래로 위치 이동 -->
+            <div class="vote-buttons mb-4" sec:authorize="isAuthenticated()">
+                <div class="d-flex gap-2">
+                    <button type="button" th:class="${hasUpvoted ? 'btn btn-success active' : 'btn btn-outline-success'}" 
+                            th:onclick="|votePost(${post.id}, true)|">
+                        👍 추천 <span id="upvoteCount" th:text="${upvoteCount}">0</span>
+                    </button>
+                    <button type="button" th:class="${hasDownvoted ? 'btn btn-danger active' : 'btn btn-outline-danger'}" 
+                            th:onclick="|votePost(${post.id}, false)|">
+                        👎 비추천 <span id="downvoteCount" th:text="${downvoteCount}">0</span>
+                    </button>
+                </div>
             </div>
             
             <!-- 디버깅 정보 (개발 중에만 사용) -->
