@@ -3,10 +3,30 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/layout}">
 <head>
-    <title>BigPicture 목록 - BIGPOOL</title>
+    <title>BigPicture - BIGPOOL</title>
     <style>
         .post-list-header {
             margin-bottom: 2rem;
+        }
+        
+        .intro-text {
+            margin-bottom: 3rem;
+            text-align: center;
+            color: #495057;
+        }
+        
+        .intro-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0061f2;
+            margin-bottom: 1rem;
+        }
+        
+        .intro-description {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
         }
         
         .post-card {
@@ -126,8 +146,14 @@
     <div layout:fragment="content">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center post-list-header">
-                <h1>BigPicture 목록</h1>
+                <h1>BigPicture</h1>
                 <a th:href="@{/bigpictures/new}" class="btn btn-primary create-btn">새 BigPicture 작성</a>
+            </div>
+            
+            <!-- 소개 텍스트 추가 -->
+            <div class="intro-text">
+                <h2 class="intro-title">"꾸준함이 모여 빛나는 결실을 맺는다"</h2>
+                <p class="intro-description">BigPicture는 학과 동아리원들의 꾸준한 학습과 성장을 기록하는 곳입니다. 작은 노력이 모여 큰 변화를 만들어내는 여정을 함께 나눠보세요.</p>
             </div>
 
             <!-- BigPicture 목록 -->

@@ -241,6 +241,20 @@
             <!-- BigPicture 내용 -->
             <div class="post-content" th:if="${bigPicture != null}" th:utext="${bigPicture.content}">BigPicture 내용</div>
             
+            <!-- 이미지 갤러리 (Firebase Storage URL 사용) -->
+            <div class="image-gallery" th:if="${imageUrls != null && !imageUrls.isEmpty()}">
+                <div class="row">
+                    <div class="col-md-12 mb-3" th:each="imageUrl, status : ${imageUrls}" th:if="${imageUrl != null && !imageUrl.isEmpty()}">
+                        <div class="gallery-item">
+                            <img th:src="${imageUrl}" 
+                                 class="img-fluid" 
+                                 th:alt="'이미지 ' + ${status.index + 1}"
+                                 onclick="openImageModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <!-- 추천/비추천 버튼 추가 -->
             <div class="vote-section text-center my-4">
                 <div class="vote-buttons">
@@ -256,20 +270,6 @@
                         <i class="fas fa-thumbs-down me-1"></i> 
                         <span class="downvote-count" th:text="${downvotes}">0</span>
                     </button>
-                </div>
-            </div>
-            
-            <!-- 이미지 갤러리 (Firebase Storage URL 사용) -->
-            <div class="image-gallery" th:if="${imageUrls != null && !imageUrls.isEmpty()}">
-                <div class="row">
-                    <div class="col-md-12 mb-3" th:each="imageUrl, status : ${imageUrls}" th:if="${imageUrl != null && !imageUrl.isEmpty()}">
-                        <div class="gallery-item">
-                            <img th:src="${imageUrl}" 
-                                 class="img-fluid" 
-                                 th:alt="'이미지 ' + ${status.index + 1}"
-                                 onclick="openImageModal(this.src)">
-                        </div>
-                    </div>
                 </div>
             </div>
             
