@@ -1,5 +1,6 @@
 package com.community.site.service;
 
+import com.community.site.model.BigPicture;
 import com.community.site.model.Comment;
 import com.community.site.model.Post;
 import com.community.site.model.User;
@@ -61,5 +62,18 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public void deleteComment(Long id) {
         commentRepository.deleteById(id);
+    }
+    
+    // BigPicture 관련 메서드 구현
+    @Override
+    @Transactional(readOnly = true)
+    public List<Comment> findByBigPicture(BigPicture bigPicture) {
+        return commentRepository.findByBigPictureOrderByCreatedAtDesc(bigPicture);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Comment> findByBigPicturePaginated(BigPicture bigPicture, Pageable pageable) {
+        return commentRepository.findByBigPicture(bigPicture, pageable);
     }
 } 

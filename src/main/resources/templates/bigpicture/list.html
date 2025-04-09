@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>BigPicture 목록 - BIGPOOL</title>
+    <style>
+        .post-list-header {
+            margin-bottom: 2rem;
+        }
+        
+        .post-card {
+            border: none;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+        }
+        
+        .post-title {
+            color: #0061f2;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+        
+        .post-title:hover {
+            color: #004bbf;
+            text-decoration: none;
+        }
+        
+        .post-meta {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        
+        .post-content {
+            color: #495057;
+            margin: 1rem 0;
+        }
+        
+        .post-footer {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 1rem;
+            border-top: 1px solid #f1f1f1;
+        }
+        
+        .post-stats {
+            display: flex;
+            gap: 1rem;
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        
+        .post-stats i {
+            margin-right: 0.25rem;
+        }
+        
+        .create-btn {
+            background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .create-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,97,242,0.2);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background-color: #f8f9fa;
+            border-radius: 0.75rem;
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            color: #0061f2;
+            margin-bottom: 1rem;
+        }
+        
+        /* 페이지네이션 스타일 */
+        .pagination-container {
+            margin-top: 2rem;
+        }
+        
+        .pagination .page-link {
+            color: #0061f2;
+            border: 1px solid #dee2e6;
+            padding: 0.5rem 0.75rem;
+            margin: 0 0.25rem;
+            border-radius: 0.25rem;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: #0061f2;
+            border-color: #0061f2;
+            color: white;
+        }
+        
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #fff;
+            border-color: #dee2e6;
+        }
+        
+        .pagination .page-link:hover {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+            color: #004bbf;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center post-list-header">
+                <h1>BigPicture 목록</h1>
+                <a th:href="@{/bigpictures/new}" class="btn btn-primary create-btn">새 BigPicture 작성</a>
+            </div>
+
+            <!-- BigPicture 목록 -->
+            <div th:if="${bigPictures == null || bigPictures.empty}" class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h3>아직 BigPicture가 없습니다</h3>
+                <p class="text-muted">첫 번째 BigPicture를 작성해보세요!</p>
+                <a th:href="@{/bigpictures/new}" class="btn btn-primary create-btn mt-3">BigPicture 작성하기</a>
+            </div>
+            
+            <div th:if="${bigPictures != null && !bigPictures.empty}" class="row">
+                <div th:each="bigPicture : ${bigPictures}" class="col-12">
+                    <div class="card post-card">
+                        <div class="card-body">
+                            <h3 class="card-title">
+                                <a th:href="@{'/bigpictures/' + ${bigPicture.id}}" th:text="${bigPicture.title}" class="post-title">제목</a>
+                            </h3>
+                            <div class="post-meta">
+                                <span th:if="${bigPicture.author != null}" th:text="${bigPicture.author.nickname}">닉네임</span>
+                                <span th:if="${bigPicture.author == null}">익명</span> • 
+                                <span th:text="${#temporals.format(bigPicture.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span>
+                            </div>
+                            <p class="post-content" th:text="${#strings.abbreviate(bigPicture.content, 200)}">내용</p>
+                            <div class="post-footer">
+                                <div class="post-stats">
+                                    <span><i class="far fa-eye"></i> <span th:text="${bigPicture.viewCount}">0</span> 조회</span>
+                                    <span><i class="far fa-comment"></i> <span th:text="${bigPicture.comments != null ? bigPicture.comments.size() : 0}">0</span> 댓글</span>
+                                </div>
+                                <a th:href="@{'/bigpictures/' + ${bigPicture.id}}" class="btn btn-sm btn-outline-primary">자세히 보기</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 페이지네이션 추가 -->
+            <div th:if="${bigPictures != null && !bigPictures.empty}" class="pagination-container mt-4 mb-5">
+                <nav aria-label="BigPicture 페이지네이션">
+                    <ul class="pagination justify-content-center">
+                        <!-- 첫 페이지로 -->
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/bigpictures(page=0, size=10, keyword=${keyword})}" aria-label="처음">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        
+                        <!-- 이전 페이지로 -->
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/bigpictures(page=${currentPage - 1}, size=10, keyword=${keyword})}" aria-label="이전">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        
+                        <!-- 페이지 숫자 -->
+                        <li class="page-item" th:each="i: ${#numbers.sequence(0, totalPages - 1)}" 
+                            th:if="${i >= currentPage - 2 && i <= currentPage + 2}"
+                            th:classappend="${currentPage == i} ? 'active'">
+                            <a class="page-link" th:href="@{/bigpictures(page=${i}, size=10, keyword=${keyword})}" th:text="${i + 1}">1</a>
+                        </li>
+                        
+                        <!-- 다음 페이지로 -->
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/bigpictures(page=${currentPage + 1}, size=10, keyword=${keyword})}" aria-label="다음">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        
+                        <!-- 마지막 페이지로 -->
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/bigpictures(page=${totalPages - 1}, size=10, keyword=${keyword})}" aria-label="마지막">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="text-center">
+                    <small class="text-muted">
+                        총 <span th:text="${totalItems}">0</span>개의 BigPicture | 
+                        <span th:text="${currentPage + 1}">1</span> / <span th:text="${totalPages}">1</span> 페이지
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

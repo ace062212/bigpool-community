@@ -31,7 +31,7 @@ public class SecurityConfig {
                 auth.requestMatchers("/uploads/**").permitAll();
                 auth.requestMatchers("/static/uploads/**").permitAll();
                 auth.requestMatchers("/admin/**").hasRole("ADMIN");
-                auth.requestMatchers("/posts/**", "/profile/**").authenticated();
+                auth.requestMatchers("/posts/**", "/bigpictures/**", "/profile/**").authenticated();
                 auth.anyRequest().permitAll();
             })
             .formLogin(form -> {

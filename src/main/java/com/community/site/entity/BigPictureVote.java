@@ -1,41 +1,43 @@
-package com.community.site.model;
+package com.community.site.entity;
 
+import com.community.site.model.BigPicture;
+import com.community.site.model.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "comments")
-@NoArgsConstructor
-@AllArgsConstructor
-public class Comment {
-
+@Table(name = "big_picture_votes",
+       uniqueConstraints = @UniqueConstraint(columnNames = {"big_picture_id", "user_id"}))
+@Getter
+@Setter
+public class BigPictureVote {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @NotBlank
-    @Column(columnDefinition = "TEXT")
-    private String content;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = true)
-    private Post post;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "big_picture_id", nullable = true)
+    @JoinColumn(name = "big_picture_id", nullable = false)
     private BigPicture bigPicture;
-
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User author;
+    private User user;
+    
+    @Column(nullable = false)
+    private boolean isUpvote; // true: 추천, false: 비추천
     
     private LocalDateTime createdAt;
     
     private LocalDateTime updatedAt;
+    
+    public BigPictureVote() {
+        // JPA 요구사항에 따른 기본 생성자
+    }
     
     @PrePersist
     protected void onCreate() {
@@ -48,25 +50,29 @@ public class Comment {
         updatedAt = LocalDateTime.now();
     }
     
+    public BigPictureVote(BigPicture bigPicture, User user, boolean isUpvote) {
+        this.bigPicture = bigPicture;
+        this.user = user;
+        this.isUpvote = isUpvote;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+    
     // Getters
     public Long getId() {
         return id;
-    }
-    
-    public String getContent() {
-        return content;
-    }
-    
-    public Post getPost() {
-        return post;
     }
     
     public BigPicture getBigPicture() {
         return bigPicture;
     }
     
-    public User getAuthor() {
-        return author;
+    public User getUser() {
+        return user;
+    }
+    
+    public boolean isUpvote() {
+        return isUpvote;
     }
     
     public LocalDateTime getCreatedAt() {
@@ -82,20 +88,16 @@ public class Comment {
         this.id = id;
     }
     
-    public void setContent(String content) {
-        this.content = content;
-    }
-    
-    public void setPost(Post post) {
-        this.post = post;
-    }
-    
     public void setBigPicture(BigPicture bigPicture) {
         this.bigPicture = bigPicture;
     }
     
-    public void setAuthor(User author) {
-        this.author = author;
+    public void setUser(User user) {
+        this.user = user;
+    }
+    
+    public void setUpvote(boolean upvote) {
+        isUpvote = upvote;
     }
     
     public void setCreatedAt(LocalDateTime createdAt) {

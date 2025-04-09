@@ -262,15 +262,19 @@
             </div>
             
             <!-- 추천/비추천 버튼 추가 - 이미지 아래로 위치 이동 -->
-            <div class="vote-buttons mb-4" sec:authorize="isAuthenticated()">
-                <div class="d-flex gap-2">
-                    <button type="button" th:class="${hasUpvoted ? 'btn btn-success active' : 'btn btn-outline-success'}" 
-                            th:onclick="|votePost(${post.id}, true)|">
-                        👍 추천 <span id="upvoteCount" th:text="${upvoteCount}">0</span>
+            <div class="vote-section text-center my-4">
+                <div class="vote-buttons">
+                    <button th:id="'upvote-btn-' + ${post.id}" class="btn btn-outline-primary me-2" 
+                            th:classappend="${hasUpvoted ? 'active' : ''}"
+                            th:attr="data-id=${post.id}, data-type='up'">
+                        <i class="fas fa-thumbs-up me-1"></i> 
+                        <span class="upvote-count" th:text="${upvoteCount}">0</span>
                     </button>
-                    <button type="button" th:class="${hasDownvoted ? 'btn btn-danger active' : 'btn btn-outline-danger'}" 
-                            th:onclick="|votePost(${post.id}, false)|">
-                        👎 비추천 <span id="downvoteCount" th:text="${downvoteCount}">0</span>
+                    <button th:id="'downvote-btn-' + ${post.id}" class="btn btn-outline-danger" 
+                            th:classappend="${hasDownvoted ? 'active' : ''}"
+                            th:attr="data-id=${post.id}, data-type='down'">
+                        <i class="fas fa-thumbs-down me-1"></i> 
+                        <span class="downvote-count" th:text="${downvoteCount}">0</span>
                     </button>
                 </div>
             </div>
@@ -320,8 +324,8 @@
                 </h3>
                 
                 <!-- 댓글 목록 -->
-                <div th:if="${comments == null || comments.empty}" class="alert alert-light">
-                    아직 댓글이 없습니다. 첫 댓글을 작성해보세요!
+                <div th:if="${comments == null || comments.empty}" class="text-center text-muted my-4">
+                    <p>아직 댓글이 없습니다. 첫 번째 댓글을 남겨보세요!</p>
                 </div>
                 
                 <div th:if="${comments != null && !comments.empty}" class="comments-list">
@@ -352,7 +356,9 @@
                             <label for="content" class="form-label">댓글 작성</label>
                             <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary comment-submit">댓글 등록</button>
+                        <button type="submit" class="btn btn-primary comment-submit">
+                            <i class="fas fa-paper-plane me-1"></i> 댓글 등록
+                        </button>
                     </form>
                 </div>
                 
@@ -379,132 +385,95 @@
                 window.open(src, '_blank', 'width=800,height=600');
             }
             
-            function votePost(postId, isUpvote) {
-                console.log('투표 시작:', isUpvote ? '추천' : '비추천', 'for post ID:', postId);
+            // 추천/비추천 기능을 처리하는 자바스크립트
+            document.addEventListener('DOMContentLoaded', function() {
+                // CSRF 토큰 가져오기
+                const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
                 
-                const url = `/posts/api/${postId}/${isUpvote ? 'upvote' : 'downvote'}`;
-                
-                console.log('요청 URL:', url);
-                console.log('현재 페이지 경로:', window.location.pathname);
-                console.log('브라우저에서 보내는 실제 요청 경로:', window.location.origin + url);
-                
-                // AJAX 요청 시 CSRF 토큰 추가
-                const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
-                
-                const headers = {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                };
-                
-                if (csrfToken && csrfHeader) {
-                    headers[csrfHeader] = csrfToken;
-                    console.log('CSRF 토큰 추가:', csrfHeader, csrfToken);
-                } else {
-                    console.warn('CSRF 토큰을 찾을 수 없습니다');
-                }
-                
-                fetch(url, {
-                    method: 'POST',
-                    headers: headers,
-                    credentials: 'include'
-                })
-                .then(response => {
-                    console.log('응답 상태:', response.status);
-                    console.log('응답 헤더:', [...response.headers].map(h => `${h[0]}: ${h[1]}`).join('\n'));
-                    
-                    // 응답이 ok가 아닌 경우 (상태 코드가 200-299 범위 밖)
-                    if (!response.ok) {
-                        return response.text().then(text => {
-                            console.error('오류 응답 내용:', text);
-                            throw new Error(text || '투표 중 오류가 발생했습니다.');
-                        });
-                    }
-                    return response.text();
-                })
-                .then(message => {
-                    console.log('성공 메시지:', message);
-                    alert(message);
-                    
-                    const upvoteCount = document.getElementById('upvoteCount');
-                    const downvoteCount = document.getElementById('downvoteCount');
-                    
-                    // 투표 상태에 따른 카운트 조정
-                    if (isUpvote) {
-                        // 추천 버튼을 누른 경우
-                        if (message.includes('취소')) {
-                            // 추천 취소
-                            upvoteCount.textContent = parseInt(upvoteCount.textContent) - 1;
-                        } else if (message.includes('비추천에서 추천으로 변경')) {
-                            // 비추천에서 추천으로 변경
-                            upvoteCount.textContent = parseInt(upvoteCount.textContent) + 1;
-                            downvoteCount.textContent = parseInt(downvoteCount.textContent) - 1;
-                        } else {
-                            // 새 추천
-                            upvoteCount.textContent = parseInt(upvoteCount.textContent) + 1;
-                        }
-                    } else {
-                        // 비추천 버튼을 누른 경우
-                        if (message.includes('취소')) {
-                            // 비추천 취소
-                            downvoteCount.textContent = parseInt(downvoteCount.textContent) - 1;
-                        } else if (message.includes('추천에서 비추천으로 변경')) {
-                            // 추천에서 비추천으로 변경
-                            downvoteCount.textContent = parseInt(downvoteCount.textContent) + 1;
-                            upvoteCount.textContent = parseInt(upvoteCount.textContent) - 1;
-                        } else {
-                            // 새 비추천
-                            downvoteCount.textContent = parseInt(downvoteCount.textContent) + 1;
-                        }
-                    }
-                    
-                    // 버튼 스타일 토글
-                    const upvoteBtn = document.querySelector('button[onclick*="true"]');
-                    const downvoteBtn = document.querySelector('button[onclick*="false"]');
-                    
-                    // 추천 버튼 스타일 업데이트
-                    if (isUpvote) {
-                        if (message.includes('취소')) {
-                            upvoteBtn.classList.remove('btn-success');
+                // 추천, 비추천 버튼에 이벤트 리스너 추가
+                document.querySelectorAll('.vote-buttons button').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const postId = this.getAttribute('data-id');
+                        const voteType = this.getAttribute('data-type');
+                        const isUpvote = voteType === 'up';
+                        
+                        // AJAX 요청 설정
+                        fetch(`/posts/api/${postId}/${isUpvote ? 'upvote' : 'downvote'}`, {
+                            method: 'POST',
+                            headers: {
+                                [header]: token,
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            credentials: 'include'
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.text().then(text => {
+                                    throw new Error(text || '투표 처리 중 오류가 발생했습니다.');
+                                });
+                            }
+                            return response.text();
+                        })
+                        .then(message => {
+                            // 추천/비추천 카운트 업데이트
+                            const upvoteCount = document.querySelector(`#upvote-btn-${postId} .upvote-count`);
+                            const downvoteCount = document.querySelector(`#downvote-btn-${postId} .downvote-count`);
+                            
+                            // 투표 상태에 따른 카운트 조정
+                            if (isUpvote) {
+                                // 추천 버튼을 누른 경우
+                                if (message.includes('취소')) {
+                                    // 추천 취소
+                                    upvoteCount.textContent = parseInt(upvoteCount.textContent) - 1;
+                                } else if (message.includes('비추천에서 추천으로 변경')) {
+                                    // 비추천에서 추천으로 변경
+                                    upvoteCount.textContent = parseInt(upvoteCount.textContent) + 1;
+                                    downvoteCount.textContent = parseInt(downvoteCount.textContent) - 1;
+                                } else {
+                                    // 새 추천
+                                    upvoteCount.textContent = parseInt(upvoteCount.textContent) + 1;
+                                }
+                            } else {
+                                // 비추천 버튼을 누른 경우
+                                if (message.includes('취소')) {
+                                    // 비추천 취소
+                                    downvoteCount.textContent = parseInt(downvoteCount.textContent) - 1;
+                                } else if (message.includes('추천에서 비추천으로 변경')) {
+                                    // 추천에서 비추천으로 변경
+                                    downvoteCount.textContent = parseInt(downvoteCount.textContent) + 1;
+                                    upvoteCount.textContent = parseInt(upvoteCount.textContent) - 1;
+                                } else {
+                                    // 새 비추천
+                                    downvoteCount.textContent = parseInt(downvoteCount.textContent) + 1;
+                                }
+                            }
+                            
+                            // 버튼 활성화 상태 업데이트
+                            const upvoteBtn = document.querySelector(`#upvote-btn-${postId}`);
+                            const downvoteBtn = document.querySelector(`#downvote-btn-${postId}`);
+                            
                             upvoteBtn.classList.remove('active');
-                            upvoteBtn.classList.add('btn-outline-success');
-                        } else {
-                            upvoteBtn.classList.remove('btn-outline-success');
-                            upvoteBtn.classList.add('btn-success');
-                            upvoteBtn.classList.add('active');
-                            
-                            // 비추천 버튼 비활성화 (추천으로 전환했을 경우)
-                            if (downvoteBtn && message.includes('비추천에서 추천으로 변경')) {
-                                downvoteBtn.classList.remove('btn-danger');
-                                downvoteBtn.classList.remove('active');
-                                downvoteBtn.classList.add('btn-outline-danger');
-                            }
-                        }
-                    } else {
-                        // 비추천 버튼 스타일 업데이트
-                        if (message.includes('취소')) {
-                            downvoteBtn.classList.remove('btn-danger');
                             downvoteBtn.classList.remove('active');
-                            downvoteBtn.classList.add('btn-outline-danger');
-                        } else {
-                            downvoteBtn.classList.remove('btn-outline-danger');
-                            downvoteBtn.classList.add('btn-danger');
-                            downvoteBtn.classList.add('active');
                             
-                            // 추천 버튼 비활성화 (비추천으로 전환했을 경우)
-                            if (upvoteBtn && message.includes('추천에서 비추천으로 변경')) {
-                                upvoteBtn.classList.remove('btn-success');
-                                upvoteBtn.classList.remove('active');
-                                upvoteBtn.classList.add('btn-outline-success');
+                            if (isUpvote) {
+                                if (!message.includes('취소')) {
+                                    upvoteBtn.classList.add('active');
+                                }
+                            } else {
+                                if (!message.includes('취소')) {
+                                    downvoteBtn.classList.add('active');
+                                }
                             }
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('에러 발생:', error);
-                    alert('투표 처리 중 오류가 발생했습니다: ' + error.message);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert(error.message);
+                        });
+                    });
                 });
-            }
+            });
             
             // 이미지 로딩 오류 처리
             document.addEventListener('DOMContentLoaded', function() {

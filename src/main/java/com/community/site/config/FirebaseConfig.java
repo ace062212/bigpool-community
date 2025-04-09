@@ -77,13 +77,15 @@ public class FirebaseConfig {
                     logger.info("Firebase Storage 버킷 접근 성공: {}", bucketName);
                 } catch (Exception e) {
                     logger.error("Firebase Storage 버킷 접근 실패: {}", e.getMessage(), e);
+                    // 버킷 접근 실패는 경고만 기록하고 계속 진행
                 }
             } else {
                 logger.info("Firebase 애플리케이션이 이미 초기화되어 있습니다.");
             }
         } catch (IOException e) {
             logger.error("Firebase 초기화 중 오류가 발생했습니다: {}", e.getMessage(), e);
-            throw new RuntimeException("Firebase 초기화 실패", e);
+            // 초기화 실패해도 애플리케이션은 계속 실행
+            logger.warn("Firebase 기능이 비활성화된 상태로 애플리케이션이 계속 실행됩니다.");
         }
     }
 } 

@@ -357,6 +357,9 @@
                         <li class="nav-item" sec:authorize="isAuthenticated()">
                             <a class="nav-link" th:href="@{/posts}">게시판</a>
                         </li>
+                        <li class="nav-item" sec:authorize="isAuthenticated()">
+                            <a class="nav-link" th:href="@{/bigpictures}">BigPicture</a>
+                        </li>
                     </ul>
                     <div class="d-flex align-items-center">
                         <div sec:authorize="isAnonymous()">

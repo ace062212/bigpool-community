@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>BigPicture 수정</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container mt-4">
+            <h2>BigPicture 수정</h2>
+            
+            <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+            
+            <form method="post" 
+                  th:action="@{'/bigpictures/' + ${bigPicture.id} + '/edit'}"
+                  enctype="multipart/form-data"
+                  th:object="${bigPicture}">
+                
+                <div class="mb-3">
+                    <label for="title" class="form-label">제목</label>
+                    <input type="text" class="form-control" id="title" th:field="*{title}" required>
+                    <div class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="content" class="form-label">내용</label>
+                    <textarea class="form-control" id="content" th:field="*{content}" rows="10" required></textarea>
+                    <div class="text-danger" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="uploadFiles" class="form-label">이미지 첨부 (여러 파일 선택 가능)</label>
+                    <input type="file" class="form-control" id="uploadFiles" name="uploadFiles" multiple accept="image/*">
+                    <small class="form-text text-muted">허용된 형식: JPG, PNG, GIF 등 이미지 파일</small>
+                </div>
+                
+                <div class="mb-3" th:if="${bigPicture.imageFiles != null && !bigPicture.imageFiles.isEmpty()}">
+                    <label class="form-label">첨부된 이미지</label>
+                    <div class="d-flex flex-wrap">
+                        <div th:each="url : ${imageUrls}" class="me-2 mb-2">
+                            <img th:src="${url}" class="img-thumbnail" style="max-height: 100px;">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <a th:href="@{'/bigpictures/' + ${bigPicture.id}}" class="btn btn-secondary">취소</a>
+                    <button type="submit" id="submitButton" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" id="submitSpinner" role="status" aria-hidden="true"></span>
+                        <span id="submitText">저장</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script th:inline="javascript">
+        // 폼 제출 여부 플래그
+        let isSubmitting = false;
+        
+        document.getElementById('uploadFiles').addEventListener('change', function(event) {
+            console.log('파일 선택됨:', event.target.files);
+            
+            for(let i = 0; i < event.target.files.length; i++) {
+                const file = event.target.files[i];
+                if(!file.type.startsWith('image/')) {
+                    alert('이미지 파일만 업로드 가능합니다.');
+                    this.value = '';
+                    return;
+                }
+            }
+        });
+        
+        // 페이지를 떠날 때 경고 메시지 표시
+        window.addEventListener('beforeunload', function(e) {
+            if (isSubmitting) {
+                e.preventDefault();
+                e.returnValue = 'BigPicture 저장 중입니다. 페이지를 떠나시겠습니까?';
+                return e.returnValue;
+            }
+        });
+        
+        // 폼 제출 시 중복 제출 방지
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(event) {
+            // 이미 제출 중이면 폼 제출 차단
+            if (isSubmitting) {
+                event.preventDefault();
+                return false;
+            }
+            
+            // 버튼 및 상태 요소
+            const submitButton = document.getElementById('submitButton');
+            const submitSpinner = document.getElementById('submitSpinner');
+            const submitText = document.getElementById('submitText');
+            
+            // 폼 유효성 검사
+            if (!form.checkValidity()) {
+                return false;
+            }
+            
+            // 제출 상태로 변경
+            isSubmitting = true;
+            
+            // 버튼 상태 변경
+            submitButton.disabled = true;
+            submitSpinner.classList.remove('d-none');
+            submitText.textContent = '저장 중...';
+            
+            // 폼이 제출된 후 10초가 지나도 응답이 없으면 타임아웃으로 간주하고 버튼 재활성화
+            setTimeout(function() {
+                if (isSubmitting) {
+                    isSubmitting = false;
+                    submitButton.disabled = false;
+                    submitSpinner.classList.add('d-none');
+                    submitText.textContent = '저장';
+                    alert('서버 응답이 지연되고 있습니다. 잠시 후 다시 시도해주세요.');
+                }
+            }, 10000);
+            
+            // 폼 제출 처리
+            return true;
+        });
+    </script>
+</body>
+</html> 

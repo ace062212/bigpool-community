@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title th:text="${bigPicture.title} + ' - BIGPOOL'">BigPicture 제목 - BIGPOOL</title>
+    <meta name="_csrf" th:content="${_csrf?.token}" />
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}" />
+    <style>
+        .post-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .post-header {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1.5rem;
+        }
+        
+        .post-title {
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .post-meta {
+            color: #6c757d;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .post-meta .author {
+            font-weight: 500;
+        }
+        
+        .post-content {
+            line-height: 1.8;
+            font-size: 1.05rem;
+            margin-bottom: 3rem;
+            white-space: pre-line;
+        }
+        
+        .post-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+        
+        .action-btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-btn {
+            background-color: #f8f9fa;
+            color: #0061f2;
+            border: 1px solid #dee2e6;
+        }
+        
+        .edit-btn:hover {
+            background-color: #e9ecef;
+            color: #004bbf;
+        }
+        
+        .delete-btn {
+            background-color: #f8d7da;
+            color: #dc3545;
+            border: 1px solid #f5c2c7;
+        }
+        
+        .delete-btn:hover {
+            background-color: #f1aeb5;
+            color: #b02a37;
+        }
+        
+        .comments-section {
+            margin-top: 3rem;
+            border-top: 1px solid #eee;
+            padding-top: 2rem;
+        }
+        
+        .comments-heading {
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #0061f2;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .comment-count {
+            background-color: #e6f2ff;
+            color: #0061f2;
+            font-size: 0.875rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+        
+        .comment-item {
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            background-color: #f8f9fa;
+            margin-bottom: 1rem;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+        
+        .comment-author {
+            font-weight: 600;
+        }
+        
+        .comment-date {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        
+        .comment-content {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+        
+        .comment-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+        
+        .comment-actions .btn {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.75rem;
+        }
+        
+        .comment-form {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 2rem;
+        }
+        
+        .comment-form textarea {
+            border-radius: 0.5rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .comment-submit {
+            background: linear-gradient(135deg, #0061f2 0%, #00c6f9 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+        
+        .comment-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,97,242,0.2);
+        }
+        
+        .login-prompt {
+            text-align: center;
+            background-color: #f8f9fa;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            margin-top: 2rem;
+        }
+        
+        .login-link {
+            color: #0061f2;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        
+        .login-link:hover {
+            text-decoration: underline;
+        }
+        
+        .back-to-list {
+            display: none;
+        }
+        
+        /* 이미지 갤러리 스타일 */
+        .image-gallery {
+            margin: 2rem 0;
+        }
+        
+        .gallery-item {
+            margin-bottom: 2rem;
+            overflow: hidden;
+            max-width: 100%;
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            object-fit: contain;
+            cursor: pointer;
+            max-height: 800px;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        /* 유튜브 비디오 컨테이너 스타일 */
+        .youtube-container {
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="post-container">
+            <!-- BigPicture 정보 -->
+            <div class="post-header">
+                <h1 class="post-title" th:text="${bigPicture != null ? bigPicture.title : 'BigPicture 없음'}">BigPicture 제목</h1>
+                <div class="post-meta">
+                    <span class="author">
+                        <i class="fas fa-user me-1"></i>
+                        <span th:if="${bigPicture != null && bigPicture.author != null}" th:text="${bigPicture.author.nickname}">작성자</span>
+                        <span th:if="${bigPicture == null || bigPicture.author == null}">익명</span>
+                    </span>
+                    <span class="date">
+                        <i class="far fa-calendar me-1"></i>
+                        <span th:if="${bigPicture != null}" th:text="${#temporals.format(bigPicture.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span>
+                    </span>
+                    <span class="views">
+                        <i class="far fa-eye me-1"></i>
+                        <span th:if="${bigPicture != null}" th:text="${bigPicture.viewCount} + ' 조회'">0 조회</span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- BigPicture 내용 -->
+            <div class="post-content" th:if="${bigPicture != null}" th:utext="${bigPicture.content}">BigPicture 내용</div>
+            
+            <!-- 추천/비추천 버튼 추가 -->
+            <div class="vote-section text-center my-4">
+                <div class="vote-buttons">
+                    <button th:id="'upvote-btn-' + ${bigPicture.id}" class="btn btn-outline-primary me-2" 
+                            th:classappend="${userVoted != null && userVoted && userVoteType == 'up'} ? 'active' : ''"
+                            th:attr="data-id=${bigPicture.id}, data-type='up'">
+                        <i class="fas fa-thumbs-up me-1"></i> 
+                        <span class="upvote-count" th:text="${upvotes}">0</span>
+                    </button>
+                    <button th:id="'downvote-btn-' + ${bigPicture.id}" class="btn btn-outline-danger" 
+                            th:classappend="${userVoted != null && userVoted && userVoteType == 'down'} ? 'active' : ''"
+                            th:attr="data-id=${bigPicture.id}, data-type='down'">
+                        <i class="fas fa-thumbs-down me-1"></i> 
+                        <span class="downvote-count" th:text="${downvotes}">0</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 이미지 갤러리 (Firebase Storage URL 사용) -->
+            <div class="image-gallery" th:if="${imageUrls != null && !imageUrls.isEmpty()}">
+                <div class="row">
+                    <div class="col-md-12 mb-3" th:each="imageUrl, status : ${imageUrls}" th:if="${imageUrl != null && !imageUrl.isEmpty()}">
+                        <div class="gallery-item">
+                            <img th:src="${imageUrl}" 
+                                 class="img-fluid" 
+                                 th:alt="'이미지 ' + ${status.index + 1}"
+                                 onclick="openImageModal(this.src)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 작성자/관리자가 보는 액션 버튼 -->
+            <div class="post-actions" th:if="${bigPicture != null && (isAuthor || isAdmin)}">
+                <a th:href="@{'/bigpictures/' + ${bigPicture.id} + '/edit'}" class="btn action-btn edit-btn">
+                    <i class="fas fa-edit me-1"></i> 수정
+                </a>
+                <form th:action="@{'/bigpictures/' + ${bigPicture.id} + '/delete'}" method="post" style="display: inline;" 
+                      onsubmit="return confirm('정말로 이 BigPicture를 삭제하시겠습니까?');">
+                    <input type="hidden" name="_csrf" th:value="${_csrf != null ? _csrf.token : ''}">
+                    <button type="submit" class="btn action-btn delete-btn">
+                        <i class="fas fa-trash-alt me-1"></i> 삭제
+                    </button>
+                </form>
+            </div>
+            
+            <!-- 댓글 섹션 -->
+            <div class="comments-section">
+                <h3 class="comments-heading">
+                    댓글 
+                    <span class="comment-count" th:text="${comments != null ? comments.size() : 0}">0</span>
+                </h3>
+                
+                <!-- 댓글 목록 -->
+                <div class="comments-list">
+                    <div th:if="${comments == null || comments.isEmpty()}" class="text-center text-muted my-4">
+                        <p>아직 댓글이 없습니다. 첫 번째 댓글을 남겨보세요!</p>
+                    </div>
+                    
+                    <div th:if="${comments != null && !comments.isEmpty()}" th:each="comment : ${comments}" class="comment-item">
+                        <div class="comment-header">
+                            <span class="comment-author">
+                                <i class="fas fa-user-circle me-1"></i>
+                                <span th:text="${comment.author.nickname}">댓글 작성자</span>
+                            </span>
+                            <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span>
+                        </div>
+                        <div class="comment-content" th:text="${comment.content}">댓글 내용</div>
+                    </div>
+                </div>
+                
+                <!-- 댓글 작성 폼 (로그인한 사용자만) -->
+                <div sec:authorize="isAuthenticated()" class="comment-form">
+                    <form th:action="@{/bigpictures/{id}/comments(id=${bigPicture.id})}" method="post" th:object="${newComment}">
+                        <input type="hidden" name="_csrf" th:value="${_csrf != null ? _csrf.token : ''}">
+                        
+                        <div class="form-group">
+                            <label for="content" class="form-label">댓글 작성</label>
+                            <textarea id="content" th:field="*{content}" class="form-control" rows="4" 
+                                      placeholder="댓글을 입력하세요..." required></textarea>
+                            <div th:if="${#fields.hasErrors('content')}" class="text-danger mt-1" th:errors="*{content}">
+                                댓글 내용을 입력해주세요.
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary comment-submit">
+                            <i class="fas fa-paper-plane me-1"></i> 댓글 등록
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- 로그인 안한 사용자를 위한 안내 -->
+                <div sec:authorize="isAnonymous()" class="login-prompt">
+                    <p>댓글을 작성하려면 <a th:href="@{/login}" class="login-link">로그인</a>이 필요합니다.</p>
+                </div>
+            </div>
+            
+            <!-- 목록으로 돌아가기 버튼 -->
+            <div class="text-center mt-5">
+                <a th:href="@{/bigpictures}" class="btn btn-outline-primary px-4">
+                    <i class="fas fa-arrow-left me-2"></i> 목록으로 돌아가기
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 이미지 모달 -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">이미지 보기</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="modalImage" src="" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 이미지 모달 스크립트 -->
+    <th:block layout:fragment="script">
+        <script>
+            function openImageModal(src) {
+                document.getElementById('modalImage').src = src;
+                var modal = new bootstrap.Modal(document.getElementById('imageModal'));
+                modal.show();
+            }
+            
+            // 추천/비추천 기능을 처리하는 자바스크립트
+            document.addEventListener('DOMContentLoaded', function() {
+                // CSRF 토큰 가져오기
+                const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+                
+                // 추천, 비추천 버튼에 이벤트 리스너 추가
+                document.querySelectorAll('.vote-buttons button').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const postId = this.getAttribute('data-id');
+                        const voteType = this.getAttribute('data-type');
+                        const isUpvote = voteType === 'up';
+                        
+                        // AJAX 요청 설정
+                        fetch(`/bigpictures/${postId}/vote?upvote=${isUpvote}`, {
+                            method: 'POST',
+                            headers: {
+                                [header]: token,
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('투표 처리 중 오류가 발생했습니다.');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            // 추천/비추천 카운트 업데이트
+                            document.querySelector(`#upvote-btn-${postId} .upvote-count`).textContent = data.upvotes;
+                            document.querySelector(`#downvote-btn-${postId} .downvote-count`).textContent = data.downvotes;
+                            
+                            // 버튼 활성화 상태 업데이트
+                            const upvoteBtn = document.querySelector(`#upvote-btn-${postId}`);
+                            const downvoteBtn = document.querySelector(`#downvote-btn-${postId}`);
+                            
+                            upvoteBtn.classList.remove('active');
+                            downvoteBtn.classList.remove('active');
+                            
+                            if (data.userVoted) {
+                                if (data.userVoteType === 'up') {
+                                    upvoteBtn.classList.add('active');
+                                } else {
+                                    downvoteBtn.classList.add('active');
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert(error.message);
+                        });
+                    });
+                });
+            });
+        </script>
+    </th:block>
+</body>
+</html> 
